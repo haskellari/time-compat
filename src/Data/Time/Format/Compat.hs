@@ -24,7 +24,7 @@ import Data.Time.Orphans ()
 import Data.Time.Format
 
 #if !MIN_VERSION_time(1,5,0)
-import System.Locale (TimeLocale, defaultTimeLocale, iso8601DateFormat, rfc822DateFormat)
+import System.Locale (TimeLocale (..), defaultTimeLocale, iso8601DateFormat, rfc822DateFormat)
 import qualified Control.Monad.Fail as Fail
 import Text.ParserCombinators.ReadP (readP_to_S, readS_to_P, ReadP)
 

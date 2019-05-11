@@ -1,2 +1,6 @@
 packages: .
 tests: true
+
+package time-compat
+  ghc-options: -Wall -fno-warn-unused-imports
+--  ghc-options: -Wno-trustworthy-safe

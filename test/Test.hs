@@ -8,10 +8,10 @@ import Data.Time.Clock.System.Compat
 
 main :: IO ()
 main = do
-    utc <- getCurrentTime
+    utc' <- getCurrentTime
 
     -- UTCTime
-    putStrLn $ formatTime defaultTimeLocale rfc822DateFormat (force utc)
+    putStrLn $ formatTime defaultTimeLocale rfc822DateFormat (force utc')
 
     -- ZonedTime
     zt <- getZonedTime

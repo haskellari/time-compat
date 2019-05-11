@@ -35,7 +35,7 @@ import Data.Time.LocalTime
 import Data.Time.Clock.Compat
 import Data.Time.Calendar.Compat
 
-import Data.Fixed (Pico (..), showFixed, divMod')
+import Data.Fixed (Pico, showFixed, divMod')
 import Data.Monoid (Monoid (..))
 import Data.Data (Data, Typeable)
 import Data.Semigroup (Semigroup (..))
