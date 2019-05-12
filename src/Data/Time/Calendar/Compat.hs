@@ -1,4 +1,5 @@
-{-# LANGUAGE CPP, DeriveDataTypeable #-}
+{-# LANGUAGE CPP                #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 module Data.Time.Calendar.Compat (
     -- * Days
     Day(..),addDays,diffDays,
@@ -24,13 +25,18 @@ module Data.Time.Calendar.Compat (
     DayOfWeek(..), dayOfWeek,
     ) where
 
+import Data.Time.Calendar
+import Data.Time.Format
 import Data.Time.Orphans ()
 
-import Data.Time.Calendar
+#if !MIN_VERSION_time(1,5,0)
+import System.Locale (TimeLocale (..))
+#endif
 
-import Data.Monoid (Monoid (..))
-import Data.Data (Data, Typeable)
+import Data.Data      (Data, Typeable)
+import Data.Monoid    (Monoid (..))
 import Data.Semigroup (Semigroup (..))
+
 
 -------------------------------------------------------------------------------
 -- CalendarDiffTime
@@ -146,7 +152,7 @@ data DayOfWeek
     | Friday
     | Saturday
     | Sunday
-    deriving (Eq, Show, Read)
+    deriving (Eq, Show, Read, Typeable)
 
 -- | \"Circular\", so for example @[Tuesday ..]@ gives an endless sequence.
 -- Also: 'fromEnum' gives [1 .. 7] for [Monday .. Sunday], and 'toEnum' performs mod 7 to give a cycle of days.
@@ -176,5 +182,21 @@ instance Enum DayOfWeek where
 
 dayOfWeek :: Day -> DayOfWeek
 dayOfWeek (ModifiedJulianDay d) = toEnum $ fromInteger $ d + 3
+
+toSomeDay :: DayOfWeek -> Day
+toSomeDay d = ModifiedJulianDay (fromIntegral $ fromEnum d + 4)
+
+#if MIN_VERSION_time(1,8,0)
+#define FORMAT_OPTS tl mpo i
+#else
+#define FORMAT_OPTS tl mpo
+#endif
+
+instance FormatTime DayOfWeek where
+    formatCharacter 'u' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'u')
+    formatCharacter 'w' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'w')
+    formatCharacter 'a' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'a')
+    formatCharacter 'A' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'A')
+    formatCharacter _  = Nothing
 
 #endif

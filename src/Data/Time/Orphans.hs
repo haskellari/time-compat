@@ -10,9 +10,6 @@ import Data.Time.Clock.TAI
 import Data.Time.Format
 
 #if !MIN_VERSION_time(1,4,0)
-
-
-
 instance NFData Day where
     rnf (ModifiedJulianDay d) = rnf d
 
