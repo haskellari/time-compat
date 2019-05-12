@@ -2,9 +2,12 @@ module Main where
 
 import Control.DeepSeq (force)
 
+import Data.Time.Calendar.Compat
+import Data.Time.Clock.System.Compat
+import Data.Time.Clock.TAI.Compat
 import Data.Time.Compat
 import Data.Time.Format.Compat
-import Data.Time.Clock.System.Compat
+import Test.HUnit.Base               ((@?=))
 
 main :: IO ()
 main = do
@@ -16,10 +19,16 @@ main = do
     -- ZonedTime
     zt <- getZonedTime
     putStrLn $ formatTime defaultTimeLocale rfc822DateFormat (force zt)
-    
+
     -- SystemTime
     st <- getSystemTime
     print $ force st
+
+    -- FormatTime DayOfWeek
+    formatTime defaultTimeLocale "%u %w %a %A" Monday @?= "1 1 Mon Monday"
+
+    -- TAI taiNominalDayStart
+    show (taiNominalDayStart (ModifiedJulianDay 123)) @?= "1859-03-20 00:00:00 TAI"
 
 _ParseTimeInstances :: [()]
 _ParseTimeInstances =
@@ -52,6 +61,7 @@ _FormatTimeInstances =
     , test (undefined :: TimeOfDay)
     , test (undefined :: LocalTime)
     , test (undefined :: ZonedTime)
+    , test (undefined :: DayOfWeek)
     ]
   where
     test :: FormatTime t => t -> ()

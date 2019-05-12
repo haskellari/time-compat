@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 module Data.Time.Clock.System.Compat (
     systemEpochDay,
     SystemTime(..),
@@ -18,6 +19,7 @@ import Data.Time.Clock.System
 import Control.DeepSeq (NFData (..))
 import Data.Int (Int64)
 import Data.Word (Word32)
+import Data.Typeable (Typeable)
 
 import Data.Time.Clock.TAI.Compat
 import Data.Time.Clock.POSIX
@@ -29,7 +31,7 @@ import Data.Time.Compat
 data SystemTime = MkSystemTime
     { systemSeconds ::     {-# UNPACK #-} !Int64
     , systemNanoseconds :: {-# UNPACK #-} !Word32
-    } deriving (Eq,Ord,Show)
+    } deriving (Eq,Ord,Show,Typeable)
 
 instance NFData SystemTime where
     rnf a = a `seq` ()
