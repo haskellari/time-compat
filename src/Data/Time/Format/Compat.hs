@@ -21,13 +21,22 @@ module Data.Time.Format.Compat (
 
 import Data.Time.Orphans ()
 
+#if !MIN_VERSION_time(1,5,0)
 import Data.Time.Format
+import System.Locale (TimeLocale, defaultTimeLocale, iso8601DateFormat, rfc822DateFormat)
+import Text.ParserCombinators.ReadP (readP_to_S, readS_to_P, ReadP)
+#else
+#if !(MIN_VERSION_time(1,9,0)) || !(MIN_VERSION_base(4,9,0))
+import Data.Time.Format hiding (parseTimeM)
+#else
+import Data.Time.Format
+#endif
+#endif
+
+import qualified Control.Monad.Fail as Fail
+import qualified Data.Time.Format
 
 #if !MIN_VERSION_time(1,5,0)
-import System.Locale (TimeLocale, defaultTimeLocale, iso8601DateFormat, rfc822DateFormat)
-import qualified Control.Monad.Fail as Fail
-import Text.ParserCombinators.ReadP (readP_to_S, readS_to_P, ReadP)
-
 parseTimeM
     :: (Fail.MonadFail m, ParseTime t)
     => Bool       -- ^ Accept leading and trailing whitespace?
@@ -65,4 +74,24 @@ readPTime :: ParseTime t =>
           -> String     -- ^ Format string
           -> ReadP t
 readPTime acceptWS l f = readS_to_P (readSTime acceptWS l f)
+
+#else
+
+-- parseTimeM has always Fail.MonadFail constraint
+#if !MIN_VERSION_time(1,9,0) || !MIN_VERSION_base(4,9,0)
+-- | Parses a time value given a format string.
+--
+-- This variant from @time-compat@ has always 'Fail.MonadFail' constraint.
+--
+-- Look at 'Data.Time.Format.parseTimeM' for documentation.
+parseTimeM
+    :: (Fail.MonadFail m, ParseTime t)
+    => Bool       -- ^ Accept leading and trailing whitespace?
+    -> TimeLocale -- ^ Time locale.
+    -> String     -- ^ Format string.
+    -> String     -- ^ Input string.
+    -> m t        -- ^ Return the time value, or fail if the in
+parseTimeM = Data.Time.Format.parseTimeM
+#endif
+
 #endif
