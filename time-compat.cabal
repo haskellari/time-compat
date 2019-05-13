@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 1.12
 name:          time-compat
 version:       1.9.2
 tested-with:   GHC ==7.8.4 || ==7.6.3 || ==7.4.2
@@ -6,31 +6,25 @@ synopsis:      Compatibility package for time
 description:
   This packages tries to compat as much of @time@ features as possible.
   .
-  /TODO:/ Difference type @ParseTime@ and @FormatTime@ instances are missing.
+  /TODO:/
+  * Difference type @ParseTime@ and @FormatTime@ instances are missing.
+  * Formatting varies depending on underlying @time@ version
+  * @dayFractionToTimeOfDay@ on extreme values
 
 category:      Time, Compatibility
-license:       BSD-3-Clause
+license:       BSD3
 license-file:  LICENSE
 maintainer:    Oleg Grenrus <oleg.grenrus@iki.fi>
 author:        Ashley Yakeley
-
+homepage:      https://github.com/phadej/time-compat
+bug-reports:   https://github.com/phadej/time-compat/issues
+build-type:    Simple
 tested-with:
-  GHC==7.0.4
-  GHC==7.2.2,
-  GHC==7.4.2,
-  GHC==7.6.3,
-  GHC==7.8.4,
-  GHC==7.10.3,
-  GHC==8.0.2,
-  GHC==8.2.2,
-  GHC==8.4.4,
-  GHC==8.6.5,
-  GHC==8.8.1
+  GHC ==8.8.1 || ==8.6.5 || ==8.4.4 || ==8.2.2 || ==8.0.2 || ==7.10.3 || ==7.8.4 || ==7.6.3 || ==7.4.2 || ==7.2.2 || ==7.0.4
 
 source-repository head
-  type:      git
-  location:  https://github.com/phadej/time-compat.git
-
+  type:     git
+  location: https://github.com/phadej/time-compat.git
 
 flag old-locale
   description: If true, use old-locale, otherwise use time 1.5 or newer.
@@ -46,14 +40,14 @@ library
     default-extensions: Trustworthy
 
   build-depends:
-    , base          >=4.3     && <4.14
-    , base-orphans  ^>=0.8.1
-    , deepseq       ^>=1.3.0.0 || ^>=1.4.1.1
-    , time          ^>=1.2.0.3 || ^>=1.4 || ^>=1.5.0.1 || ^>=1.6.0.1 || ^>=1.8.0.2 || ^>=1.9.2
+      base          >=4.3     && <4.14
+    , base-orphans  >=0.8.1   && <0.9
+    , deepseq       >=1.3.0.0 && <1.4 || >=1.4.1.1 && <1.5
+    , time          >=1.2     && <1.3 || >=1.4 && <1.7 || >=1.8 && <1.10
 
   if flag(old-locale)
     build-depends:
-      , old-locale  ^>=1.0.0.2
+        old-locale  >=1.0.0.2 && <1.1
       , time        >=0       && <1.5
 
   else
@@ -61,7 +55,7 @@ library
 
   if !impl(ghc >=8.0)
     build-depends:
-      , fail        ^>=4.9.0.0
+        fail        >=4.9.0.0 && <4.10
       , semigroups  >=0.18.5  && <0.20
 
   exposed-modules:
@@ -91,7 +85,71 @@ test-suite instances
   hs-source-dirs:   test
   main-is:          Test.hs
   build-depends:
-    , base
+      base
     , deepseq
+    , HUnit        >=1.3.1 && <1.3.2 || >=1.6.0.0 && <1.7
     , time-compat
-    , HUnit ^>=1.6.0.0 || ^>=1.3.1.2
+
+-- This test-suite is from test library
+test-suite main
+  if !impl(ghc >=7.4)
+    buildable: False
+
+  default-language:   Haskell2010
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     test/main
+  default-extensions:
+    CPP
+    DeriveDataTypeable
+    ExistentialQuantification
+    FlexibleInstances
+    MultiParamTypeClasses
+    Rank2Types
+    ScopedTypeVariables
+    StandaloneDeriving
+    TupleSections
+    UndecidableInstances
+
+  ghc-options:        -Wall -fwarn-tabs
+  build-depends:
+      base
+    , base-compat       >=0.10.5 && <0.11
+    , deepseq
+    , QuickCheck        >=2.13   && <2.14
+    , tagged            >=0.8.6  && <0.9
+    , tasty             >=1.2.1  && <1.3
+    , tasty-hunit       >=0.10   && <0.11
+    , tasty-quickcheck  >=0.10   && <0.11
+    , time-compat
+
+  build-depends:      time
+  main-is:            Main.hs
+  other-modules:
+    Test.Arbitrary
+    Test.Calendar.AddDays
+    Test.Calendar.AddDaysRef
+    Test.Calendar.Calendars
+    Test.Calendar.CalendarsRef
+    Test.Calendar.ClipDates
+    Test.Calendar.ClipDatesRef
+    Test.Calendar.ConvertBack
+    Test.Calendar.Duration
+    Test.Calendar.Easter
+    Test.Calendar.EasterRef
+    Test.Calendar.LongWeekYears
+    Test.Calendar.LongWeekYearsRef
+    Test.Calendar.MonthDay
+    Test.Calendar.MonthDayRef
+    Test.Calendar.Valid
+    Test.Calendar.Week
+    Test.Clock.Conversion
+    Test.Clock.Resolution
+    Test.Clock.TAI
+    Test.Format.Format
+    Test.Format.ISO8601
+    Test.Format.ParseTime
+    Test.LocalTime.CalendarDiffTime
+    Test.LocalTime.Time
+    Test.LocalTime.TimeOfDay
+    Test.LocalTime.TimeRef
+    Test.TestUtil
