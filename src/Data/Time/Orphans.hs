@@ -49,4 +49,10 @@ instance ParseTime UniversalTime where
 
 instance FormatTime UniversalTime where
     formatCharacter c = fmap (\f tl fo t -> f tl fo (ut1ToLocalTime 0 t)) (formatCharacter c)
+
+instance Show UniversalTime where
+    show t = show (ut1ToLocalTime 0 t)
+
+instance Read UniversalTime where
+    readsPrec n s = [ (localTimeToUT1 0 t, r) | (t,r) <- readsPrec n s ]
 #endif
