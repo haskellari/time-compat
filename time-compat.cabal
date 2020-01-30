@@ -1,7 +1,7 @@
 cabal-version: 1.12
 name:          time-compat
 version:       1.9.2.2
-x-revision:    1
+x-revision:    2
 synopsis:      Compatibility package for time
 description:
   This packages tries to compat as much of @time@ features as possible.

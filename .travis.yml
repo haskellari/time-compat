@@ -177,9 +177,9 @@ script:
   # Constraint sets
   - rm -rf cabal.project.local
   # Constraint set time-1.9.3
-  - if [ $HCNUMVER -ge 70800 ] && [ $HCNUMVER -lt 80800 ] ; then ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --constraint='time ==1.9.2' all ; fi
+  - if [ $HCNUMVER -ge 70800 ] ; then ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --constraint='time ==1.9.2' all ; fi
   # Constraint set time-1.9.2
-  - if [ $HCNUMVER -ge 70800 ] && [ $HCNUMVER -lt 80800 ] ; then ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --constraint='time ==1.9.2' all ; fi
+  - if [ $HCNUMVER -ge 70800 ] && [ $HCNUMVER -lt 81000 ] ; then ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --constraint='time ==1.9.2' all ; fi
   # Constraint set time-1.8
   - if [ $HCNUMVER -ge 70800 ] && [ $HCNUMVER -lt 80800 ] ; then ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --constraint='time ==1.8.*' all ; fi
   # Constraint set time-1.6
