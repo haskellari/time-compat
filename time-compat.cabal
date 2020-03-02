@@ -1,7 +1,7 @@
 cabal-version: 1.12
 name:          time-compat
 version:       1.9.2.2
-x-revision:    2
+x-revision:    3
 synopsis:      Compatibility package for time
 description:
   This packages tries to compat as much of @time@ features as possible.
@@ -127,7 +127,7 @@ test-suite main
   ghc-options:        -Wall -fwarn-tabs
   build-depends:
       base
-    , base-compat       >=0.10.5 && <0.11
+    , base-compat       >=0.10.5 && <0.12
     , deepseq
     , QuickCheck        >=2.13   && <2.14
     , tagged            >=0.8.6  && <0.9
