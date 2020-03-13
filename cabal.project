@@ -1,2 +1,5 @@
 packages: .
 tests: true
+
+-- To allow building with time-1.10
+allow-newer: time

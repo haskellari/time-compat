@@ -93,5 +93,30 @@ parseTimeM
     -> m t        -- ^ Return the time value, or fail if the in
 parseTimeM = Data.Time.Format.parseTimeM
 #endif
+#endif
 
+#if MIN_VERSION_time(1,10,0)
+{-# DEPRECATED parseTime "use \"parseTimeM True\" instead" #-}
+parseTime :: ParseTime t =>
+             TimeLocale -- ^ Time locale.
+          -> String     -- ^ Format string.
+          -> String     -- ^ Input string.
+          -> Maybe t    -- ^ The time value, or 'Nothing' if the input could
+                        -- not be parsed using the given format.
+parseTime = parseTimeM True
+
+{-# DEPRECATED readTime "use \"parseTimeOrError True\" instead" #-}
+readTime :: ParseTime t =>
+            TimeLocale -- ^ Time locale.
+         -> String     -- ^ Format string.
+         -> String     -- ^ Input string.
+         -> t          -- ^ The time value.
+readTime = parseTimeOrError True
+
+{-# DEPRECATED readsTime "use \"readSTime True\" instead" #-}
+readsTime :: ParseTime t =>
+             TimeLocale -- ^ Time locale.
+          -> String     -- ^ Format string
+          -> ReadS t
+readsTime = readSTime True
 #endif
