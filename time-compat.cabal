@@ -1,8 +1,7 @@
-cabal-version: 1.12
-name:          time-compat
-version:       1.9.2.2
-x-revision:    2
-synopsis:      Compatibility package for time
+cabal-version:      1.12
+name:               time-compat
+version:            1.9.3
+synopsis:           Compatibility package for time
 description:
   This packages tries to compat as much of @time@ features as possible.
   .
@@ -14,14 +13,15 @@ description:
   .
   * @dayFractionToTimeOfDay@ on extreme values
 
-category:      Time, Compatibility
-license:       BSD3
-license-file:  LICENSE
-maintainer:    Oleg Grenrus <oleg.grenrus@iki.fi>
-author:        Ashley Yakeley
-homepage:      https://github.com/phadej/time-compat
-bug-reports:   https://github.com/phadej/time-compat/issues
-build-type:    Simple
+category:           Time, Compatibility
+license:            BSD3
+license-file:       LICENSE
+maintainer:         Oleg Grenrus <oleg.grenrus@iki.fi>
+author:             Ashley Yakeley
+homepage:           https://github.com/phadej/time-compat
+bug-reports:        https://github.com/phadej/time-compat/issues
+build-type:         Simple
+extra-source-files: CHANGELOG.md
 tested-with:
   GHC ==7.0.4
    || ==7.2.2
@@ -33,7 +33,7 @@ tested-with:
    || ==8.2.2
    || ==8.4.4
    || ==8.6.5
-   || ==8.8.2
+   || ==8.8.3
    || ==8.10.1
 
 source-repository head
@@ -57,7 +57,7 @@ library
       base          >=4.3     && <4.15
     , base-orphans  >=0.8.1   && <0.9
     , deepseq       >=1.3.0.0 && <1.4 || >=1.4.1.1 && <1.5
-    , time          >=1.2     && <1.3 || >=1.4 && <1.7 || >=1.8 && <1.9 || >=1.9.2 && <1.9.4
+    , time          >=1.2     && <1.3 || >=1.4 && <1.7 || >=1.8 && <1.9 || >=1.9.2 && <1.9.4 || >=1.10 && <1.10.1
 
   if flag(old-locale)
     build-depends:
@@ -127,7 +127,7 @@ test-suite main
   ghc-options:        -Wall -fwarn-tabs
   build-depends:
       base
-    , base-compat       >=0.10.5 && <0.11
+    , base-compat       >=0.10.5 && <0.12
     , deepseq
     , QuickCheck        >=2.13   && <2.14
     , tagged            >=0.8.6  && <0.9

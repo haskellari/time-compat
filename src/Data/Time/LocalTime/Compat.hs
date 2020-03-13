@@ -12,6 +12,7 @@ module Data.Time.LocalTime.Compat (
     utcToLocalTimeOfDay,localToUTCTimeOfDay,
     timeToTimeOfDay,timeOfDayToTime,
     dayFractionToTimeOfDay,timeOfDayToDayFraction,
+    pastMidnight, sinceMidnight,
 
     -- * CalendarDiffTime
     CalendarDiffTime (..),
@@ -60,6 +61,16 @@ timeToDaysAndTimeOfDay dt = let
 daysAndTimeOfDayToTime :: Integer -> TimeOfDay -> NominalDiffTime
 daysAndTimeOfDayToTime d (TimeOfDay dh hm ms) = (+) (realToFrac ms) $ (*) 60 $ (+) (realToFrac hm) $ (*) 60 $ (+) (realToFrac dh) $ (*) 24 $ realToFrac d
 
+#endif
+
+#if !MIN_VERSION_time(1,10,0)
+-- | Same as 'timeToTimeOfDay'.
+pastMidnight :: DiffTime -> TimeOfDay
+pastMidnight = timeToTimeOfDay
+
+-- | Same as 'timeOfDayToTime'.
+sinceMidnight :: TimeOfDay -> DiffTime
+sinceMidnight = timeOfDayToTime
 #endif
 
 -------------------------------------------------------------------------------
