@@ -1,13 +1,28 @@
 {-# LANGUAGE CPP #-}
-module Data.Time.Orphans where
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+module Data.Time.Orphans () where
 
 import Data.Orphans ()
 
 import Control.DeepSeq (NFData (..))
+import Data.Typeable (Typeable)
+import Data.Data (Data)
 import Data.Time
 import Data.Time.Clock
 import Data.Time.Clock.TAI
 import Data.Time.Format
+
+#if MIN_VERSION_time(1,8,0)
+import Data.Time.Clock.System
+#endif
+
+#if !MIN_VERSION_time(1,11,0)
+import Data.Fixed (Pico)
+import Text.Read (Read (..))
+import Text.ParserCombinators.ReadP
+import Text.ParserCombinators.ReadPrec
+#endif
 
 #if !MIN_VERSION_time(1,4,0)
 instance NFData Day where
@@ -55,4 +70,40 @@ instance Show UniversalTime where
 
 instance Read UniversalTime where
     readsPrec n s = [ (localTimeToUT1 0 t, r) | (t,r) <- readsPrec n s ]
+#endif
+
+
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,11,0)
+deriving instance Ord DayOfWeek
+#endif
+
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,10,0)
+#if __GLASGOW_HASKELL__ <710
+deriving instance Typeable DayOfWeek
+#endif
+deriving instance Data DayOfWeek
+#endif
+
+#if MIN_VERSION_time(1,8,0) && !MIN_VERSION_time(1,10,0)
+#if __GLASGOW_HASKELL__ <710
+deriving instance Typeable SystemTime
+#endif
+
+deriving instance Data SystemTime
+#endif
+
+#if !MIN_VERSION_time(1,11,0)
+
+instance Read DiffTime where
+    readPrec = do
+        t <- readPrec :: ReadPrec Pico
+        _ <- lift $ char 's'
+        return $ realToFrac t
+
+instance Read NominalDiffTime where
+    readPrec = do
+        t <- readPrec :: ReadPrec Pico
+        _ <- lift $ char 's'
+        return $ realToFrac t
+
 #endif

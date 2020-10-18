@@ -5,7 +5,9 @@ module Data.Time.Format.Compat (
 
     -- * UNIX-style parsing
     -- ** __Note__ in compat mode acceptWS argument is ignored, it's always 'True'.
-    parseTimeM, parseTimeOrError,
+    parseTimeM,
+    -- parseTimeMultipleM, -- TODO
+    parseTimeOrError,
     readSTime, readPTime,
     parseTime, readTime, readsTime,
     ParseTime(),
@@ -120,3 +122,17 @@ readsTime :: ParseTime t =>
           -> ReadS t
 readsTime = readSTime True
 #endif
+
+-- TODO:
+--
+-- #if !MIN_VERSION_time(1,11,0)
+-- -- | Parses a time value given a list of pairs of format and input.
+-- -- Resulting value is constructed from all provided specifiers.
+-- parseTimeMultipleM
+--     :: (Fail.MonadFail m, ParseTime t)
+--     => Bool -- ^ Accept leading and trailing whitespace?
+--     -> TimeLocale -- ^ Time locale.
+--     -> [(String, String)] -- ^ Pairs of (format string, input string).
+--     -> m t -- ^ Return the time value, or fail if the input could not be parsed using the given format.
+-- parseTimeMultipleM = undefined -- parseTimeMultipleM' Proxy
+-- #endif

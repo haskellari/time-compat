@@ -3,6 +3,7 @@ module Main where
 import Control.DeepSeq (force)
 
 import Data.Time.Calendar.Compat
+import Data.Time.Calendar.Month.Compat
 import Data.Time.Clock.System.Compat
 import Data.Time.Clock.TAI.Compat
 import Data.Time.Compat
@@ -62,6 +63,7 @@ _FormatTimeInstances =
     , test (undefined :: LocalTime)
     , test (undefined :: ZonedTime)
     , test (undefined :: DayOfWeek)
+    , test (undefined :: Month)
     ]
   where
     test :: FormatTime t => t -> ()
