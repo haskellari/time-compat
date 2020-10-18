@@ -25,10 +25,16 @@ module Data.Time.Clock.Compat (
   
     -- * Current time
     getCurrentTime,
-    getTime_resolution
+    getTime_resolution,
+
+    -- * Type aliases
+    Year,
+    MonthOfYear,
+    DayOfMonth,
     ) where
 
 import Data.Time.Orphans ()
+import Data.Time.Calendar.Types
 
 import Data.Time.Clock
 import Data.Fixed (Pico)

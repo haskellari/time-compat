@@ -1,5 +1,9 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+#if __GLASGOW_HASKELL__ >= 710
+{-# LANGUAGE PatternSynonyms    #-}
+{-# LANGUAGE ViewPatterns       #-}
+#endif
 module Data.Time.Calendar.Compat (
     -- * Days
     Day(..),addDays,diffDays,
@@ -23,11 +27,26 @@ module Data.Time.Calendar.Compat (
 
       -- * Week
     DayOfWeek(..), dayOfWeek,
+    dayOfWeekDiff, firstDayOfWeekOnAfter,
+
+    -- * Type aliases
+    DayOfMonth, MonthOfYear, Year,
+#if __GLASGOW_HASKELL__ >= 710
+    pattern YearMonthDay,
+#endif
     ) where
 
 import Data.Time.Calendar
 import Data.Time.Format
 import Data.Time.Orphans ()
+
+#if !MIN_VERSION_time(1,11,0)
+import Data.Time.Calendar.Types
+#endif
+
+#if !MIN_VERSION_time(1,9,0)
+import Data.Time.Calendar.WeekDate.Compat
+#endif
 
 #if !MIN_VERSION_time(1,5,0)
 import System.Locale (TimeLocale (..))
@@ -138,65 +157,31 @@ diffGregorianDurationRollOver day2 day1 = let
 
 #endif
 
+#if !MIN_VERSION_time(1,11,0)
+#if __GLASGOW_HASKELL__ >= 710
+-- | Bidirectional abstract constructor for the proleptic Gregorian calendar.
+-- Invalid values will be clipped to the correct range, month first, then day.
+pattern YearMonthDay :: Year -> MonthOfYear -> DayOfMonth -> Day
+pattern YearMonthDay y m d <- (toGregorian -> (y,m,d)) where
+    YearMonthDay y m d = fromGregorian y m d
+
+#if __GLASGOW_HASKELL__ >= 802
+{-# COMPLETE YearMonthDay #-}
+#endif
+#endif
+#endif
+
 -------------------------------------------------------------------------------
 -- DayOfWeek
 -------------------------------------------------------------------------------
 
-#if !MIN_VERSION_time(1,9,0)
+#if !MIN_VERSION_time(1,11,0)
+-- | @dayOfWeekDiff a b = a - b@ in range 0 to 6.
+-- The number of days from b to the next a.
+dayOfWeekDiff :: DayOfWeek -> DayOfWeek -> Int
+dayOfWeekDiff a b = mod (fromEnum a - fromEnum b) 7
 
-data DayOfWeek
-    = Monday
-    | Tuesday
-    | Wednesday
-    | Thursday
-    | Friday
-    | Saturday
-    | Sunday
-    deriving (Eq, Show, Read, Typeable)
-
--- | \"Circular\", so for example @[Tuesday ..]@ gives an endless sequence.
--- Also: 'fromEnum' gives [1 .. 7] for [Monday .. Sunday], and 'toEnum' performs mod 7 to give a cycle of days.
-instance Enum DayOfWeek where
-    toEnum i =
-        case mod i 7 of
-            0 -> Sunday
-            1 -> Monday
-            2 -> Tuesday
-            3 -> Wednesday
-            4 -> Thursday
-            5 -> Friday
-            _ -> Saturday
-    fromEnum Monday = 1
-    fromEnum Tuesday = 2
-    fromEnum Wednesday = 3
-    fromEnum Thursday = 4
-    fromEnum Friday = 5
-    fromEnum Saturday = 6
-    fromEnum Sunday = 7
-    enumFromTo wd1 wd2
-        | wd1 == wd2 = [wd1]
-    enumFromTo wd1 wd2 = wd1 : enumFromTo (succ wd1) wd2
-    enumFromThenTo wd1 wd2 wd3
-        | wd2 == wd3 = [wd1, wd2]
-    enumFromThenTo wd1 wd2 wd3 = wd1 : enumFromThenTo wd2 (toEnum $ (2 * fromEnum wd2) - (fromEnum wd1)) wd3
-
-dayOfWeek :: Day -> DayOfWeek
-dayOfWeek (ModifiedJulianDay d) = toEnum $ fromInteger $ d + 3
-
-toSomeDay :: DayOfWeek -> Day
-toSomeDay d = ModifiedJulianDay (fromIntegral $ fromEnum d + 4)
-
-#if MIN_VERSION_time(1,8,0)
-#define FORMAT_OPTS tl mpo i
-#else
-#define FORMAT_OPTS tl mpo
-#endif
-
-instance FormatTime DayOfWeek where
-    formatCharacter 'u' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'u')
-    formatCharacter 'w' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'w')
-    formatCharacter 'a' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'a')
-    formatCharacter 'A' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'A')
-    formatCharacter _  = Nothing
-
+-- | The first day-of-week on or after some day
+firstDayOfWeekOnAfter :: DayOfWeek -> Day -> Day
+firstDayOfWeekOnAfter dw d = addDays (toInteger $ dayOfWeekDiff dw $ dayOfWeek d) d
 #endif

@@ -1,13 +1,23 @@
 {-# LANGUAGE CPP #-}
+#if __GLASGOW_HASKELL__ >= 710
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ViewPatterns    #-}
+#endif
 module Data.Time.Calendar.Julian.Compat (
+    Year, MonthOfYear, DayOfMonth, DayOfYear,
 
+    -- JulianYearDay
     toJulianYearAndDay,
     fromJulianYearAndDay,
     fromJulianYearAndDayValid,
     showJulianYearAndDay,
     isJulianLeapYear,
 
-    toJulian,fromJulian,fromJulianValid,showJulian,julianMonthLength,
+    toJulian,fromJulian,
+#if __GLASGOW_HASKELL__ >= 710
+    pattern JulianYearMonthDay,
+#endif
+    fromJulianValid,showJulian,julianMonthLength,
 
     -- calendrical arithmetic
     -- e.g. "one month after March 31st"
@@ -15,12 +25,16 @@ module Data.Time.Calendar.Julian.Compat (
     addJulianYearsClip,addJulianYearsRollOver,
     addJulianDurationClip,addJulianDurationRollOver,
     diffJulianDurationClip,diffJulianDurationRollOver,
-    ) where
+) where
 
 import Data.Time.Orphans ()
 
 import Data.Time.Calendar.Julian
-import Data.Time.Calendar.Compat 
+import Data.Time.Calendar.Compat
+
+#if !MIN_VERSION_time(1,11,0)
+import Data.Time.Calendar.Types
+#endif
 
 #if !MIN_VERSION_time(1,9,0)
 
@@ -63,4 +77,18 @@ diffJulianDurationRollOver day2 day1 = let
     dayAllowed = addJulianDurationRollOver (CalendarDiffDays ymAllowed 0) day1
     in CalendarDiffDays ymAllowed $ diffDays day2 dayAllowed
 
+#endif
+
+#if !MIN_VERSION_time(1,11,0)
+#if __GLASGOW_HASKELL__ >= 710
+-- | Bidirectional abstract constructor for the proleptic Julian calendar.
+-- Invalid values will be clipped to the correct range, month first, then day.
+pattern JulianYearMonthDay :: Year -> MonthOfYear -> DayOfMonth -> Day
+pattern JulianYearMonthDay y m d <- (toJulian -> (y,m,d)) where
+    JulianYearMonthDay y m d = fromJulian y m d
+
+#if __GLASGOW_HASKELL__ >= 802
+{-# COMPLETE JulianYearMonthDay #-}
+#endif
+#endif
 #endif
