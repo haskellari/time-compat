@@ -2,9 +2,19 @@
 
 set -e
 
-# OPERATION="cabal build --disable-tests"
-# OPERATION="cabal build --enable-tests"
-OPERATION="cabal test --enable-tests"
+STOREDIR=$(pwd)/dist-newstyle/store
+
+if [ "$1" = "build" ]; then
+	OPERATION="cabal --store-dir=$STOREDIR build --disable-tests"
+elif [ "$1" = "buildtest" ]; then
+	OPERATION="cabal --store-dir=$STOREDIR build --enable-tests"
+else
+	OPERATION="cabal --store-dir=$STOREDIR test --enable-tests"
+fi
+
+echo "===================================================================="
+echo "== $OPERATION"
+echo "===================================================================="
 
 testbuild() {
     echo "===================================================================="

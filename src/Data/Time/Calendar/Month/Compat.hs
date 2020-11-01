@@ -13,11 +13,34 @@ module Data.Time.Calendar.Month.Compat (
 #if __GLASGOW_HASKELL__ >= 710
     pattern MonthDay,
 #endif
-    fromMonthDayValid
+    fromMonthDayValid,
+    -- * time-compat extras
+    fromYearMonth,
+    toYearMonth,
+    fromMonthDay,
+    toMonthDay,
 ) where
 
 #if MIN_VERSION_time(1,11,0)
+import Data.Time.Calendar
 import Data.Time.Calendar.Month
+
+-- | Part of @YearMonth@ pattern
+fromYearMonth :: Year -> MonthOfYear -> Month
+fromYearMonth = YearMonth
+
+-- | Part of @YearMonth@ pattern
+toYearMonth :: Month -> (Year, MonthOfYear)
+toYearMonth (YearMonth y m) = (y, m)
+
+-- | Part of 'MonthDay' pattern
+fromMonthDay :: Month -> DayOfMonth -> Day
+fromMonthDay = MonthDay
+
+-- | Part of 'MonthDay' pattern
+toMonthDay :: Day -> (Month,DayOfMonth)
+toMonthDay (MonthDay m d) = (m, d)
+
 #else
 
 #if MIN_VERSION_time(1,9,0)
@@ -64,7 +87,7 @@ instance Ix Month where
 
 -- | Show as @yyyy-mm@.
 instance Show Month where
-    show ym = case fromYearMonth ym of
+    show ym = case toYearMonth ym of
         (y, m) -> show4 y ++ "-" ++ show2 m
 
 -- | Read as @yyyy-mm@.
@@ -73,7 +96,7 @@ instance Read Month where
         y <- readPrec
         _ <- lift $ char '-'
         m <- readPrec
-        return $ toYearMonth y m
+        return $ fromYearMonth y m
 
 -------------------------------------------------------------------------------
 -- ForematTime Month
@@ -120,35 +143,41 @@ diffMonths (MkMonth a) (MkMonth b) = a - b
 fromYearMonthValid :: Year -> MonthOfYear -> Maybe Month
 fromYearMonthValid y my = do
     my' <- clipValid 1 12 my
-    return $ toYearMonth y my'
+    return $ fromYearMonth y my'
 
 -- | Part of @YearMonth@ pattern
-toYearMonth :: Year -> MonthOfYear -> Month
-toYearMonth y my = MkMonth $ (y * 12) + toInteger (pred $ clip 1 12 my)
+fromYearMonth :: Year -> MonthOfYear -> Month
+fromYearMonth y my = MkMonth $ (y * 12) + toInteger (pred $ clip 1 12 my)
 
 -- | Part of @YearMonth@ pattern
-fromYearMonth :: Month -> (Year, MonthOfYear)
-fromYearMonth (MkMonth m) = case divMod' m 12 of
+toYearMonth :: Month -> (Year, MonthOfYear)
+toYearMonth (MkMonth m) = case divMod' m 12 of
     (y, my) -> (y, succ (fromInteger my))
 
 #if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor.
 -- Invalid months of year will be clipped to the correct range.
 pattern YearMonth :: Year -> MonthOfYear -> Month
-pattern YearMonth y my <- (fromYearMonth -> (y, my))
-  where YearMonth y my = toYearMonth y my
+pattern YearMonth y my <- (toYearMonth -> (y, my))
+  where YearMonth y my = fromYearMonth y my
 
 #if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearMonth #-}
 #endif
 #endif
 
+-- | Part of 'MonthDay' pattern
 toMonthDay :: Day -> (Month,DayOfMonth)
 toMonthDay d = case toGregorian d of 
-    (y, my, dm) -> (toYearMonth y my, dm)
+    (y, my, dm) -> (fromYearMonth y my, dm)
+
+-- | Part of 'MonthDay' pattern
+fromMonthDay :: Month -> DayOfMonth -> Day
+fromMonthDay m dm = case toYearMonth m of
+    (y, my) -> fromGregorian y my dm
 
 fromMonthDayValid :: Month -> DayOfMonth -> Maybe Day
-fromMonthDayValid m dm = case fromYearMonth m of
+fromMonthDayValid m dm = case toYearMonth m of
     (y, my) -> fromGregorianValid y my dm
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -157,6 +186,7 @@ fromMonthDayValid m dm = case fromYearMonth m of
 pattern MonthDay :: Month -> DayOfMonth -> Day
 pattern MonthDay m dm <- (toMonthDay -> (m,dm)) where
     MonthDay (YearMonth y my) dm = fromGregorian y my dm
+
 
 #if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE MonthDay #-}
