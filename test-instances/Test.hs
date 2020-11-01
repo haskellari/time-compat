@@ -1,9 +1,10 @@
 module Main where
 
-import Control.DeepSeq (force)
+import Control.DeepSeq (NFData (rnf), force)
 
 import Data.Time.Calendar.Compat
 import Data.Time.Calendar.Month.Compat
+import Data.Time.Calendar.Quarter.Compat
 import Data.Time.Clock.System.Compat
 import Data.Time.Clock.TAI.Compat
 import Data.Time.Compat
@@ -67,4 +68,37 @@ _FormatTimeInstances =
     ]
   where
     test :: FormatTime t => t -> ()
+    test _ = ()
+
+_NFDataInstances :: [()]
+_NFDataInstances =
+    [ test (undefined :: CalendarDiffTime)
+    , test (undefined :: Day)
+    , test (undefined :: DiffTime)
+    , test (undefined :: NominalDiffTime)
+    , test (undefined :: UTCTime)
+    , test (undefined :: UniversalTime)
+    , test (undefined :: CalendarDiffTime)
+    , test (undefined :: TimeZone)
+    , test (undefined :: TimeOfDay)
+    , test (undefined :: LocalTime)
+    , test (undefined :: ZonedTime)
+    , test (undefined :: DayOfWeek)
+    , test (undefined :: Month)
+    , test (undefined :: Quarter)
+    , test (undefined :: QuarterOfYear)
+    ]
+  where
+    test :: NFData t => t -> ()
+    test = rnf 
+
+_EnumInstances :: [()]
+_EnumInstances =
+    [ test (undefined :: Day)
+    , test (undefined :: Month)
+    , test (undefined :: Quarter)
+    , test (undefined :: QuarterOfYear)
+    ]
+  where
+    test :: Enum t => t -> ()
     test _ = ()

@@ -41,6 +41,8 @@ import Data.Monoid (Monoid (..))
 import Data.Data (Data, Typeable)
 import Data.Semigroup (Semigroup (..))
 
+import Control.DeepSeq (NFData (..))
+
 -------------------------------------------------------------------------------
 -- TimeOfDay
 -------------------------------------------------------------------------------
@@ -94,11 +96,14 @@ data CalendarDiffTime = CalendarDiffTime
 
 -- | Additive
 instance Semigroup CalendarDiffTime where
-
     CalendarDiffTime m1 d1 <> CalendarDiffTime m2 d2 = CalendarDiffTime (m1 + m2) (d1 + d2)
+
 instance Monoid CalendarDiffTime where
     mempty = CalendarDiffTime 0 0
     mappend = (<>)
+
+instance NFData CalendarDiffTime where
+    rnf (CalendarDiffTime x y) = rnf x `seq` rnf y
 
 instance Show CalendarDiffTime where
     show (CalendarDiffTime m t) = "P" ++ show m ++ "MT" ++ showFixed True (realToFrac t :: Pico) ++ "S"

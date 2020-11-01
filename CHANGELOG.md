@@ -6,6 +6,9 @@
   - Pattern synonyms
   - `parseTimeMultipleM` is not backported
   - `Month` is missing `ParseTime` instance
+  - Compat extras:
+    - Add `Ix`, `Enum`, `NFData` instances to `Month`, `Quarter`, `QuarterOfYear`,
+      `CalendarDiffTime` and `DayOfWeek`.
 
 # 1.9.3
 

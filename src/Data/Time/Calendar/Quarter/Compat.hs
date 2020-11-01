@@ -25,6 +25,8 @@ import Text.Read                       (Read (..))
 import Data.Fixed                      (mod', divMod')
 import Text.ParserCombinators.ReadPrec (lift)
 import Text.ParserCombinators.ReadP    (char)
+import Control.DeepSeq (NFData (..))
+import Data.Ix (Ix (..))
 
 import Data.Time.Calendar
 import Data.Time.Calendar.Types
@@ -33,6 +35,12 @@ import Data.Time.Calendar.Month.Compat
 
 -- | Quarters of each year. Each quarter corresponds to three months.
 data QuarterOfYear = Q1 | Q2 | Q3 | Q4 deriving (Eq, Ord, Data, Typeable, Read, Show)
+
+instance NFData QuarterOfYear where
+    rnf Q1 = ()
+    rnf Q2 = ()
+    rnf Q3 = ()
+    rnf Q4 = ()
 
 -- | maps Q1..Q4 to 1..4
 instance Enum QuarterOfYear where
@@ -54,6 +62,26 @@ instance Bounded QuarterOfYear where
 -- | An absolute count of year quarters.
 -- Number is equal to @(year * 4) + (quarterOfYear - 1)@.
 newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable)
+
+instance NFData Quarter where
+    rnf (MkQuarter m) = rnf m
+
+instance Enum Quarter where
+    succ (MkQuarter a) = MkQuarter (succ a)
+    pred (MkQuarter a) = MkQuarter (pred a)
+    toEnum = MkQuarter . toEnum
+    fromEnum (MkQuarter a) = fromEnum a
+    enumFrom (MkQuarter a) = fmap MkQuarter (enumFrom a)
+    enumFromThen (MkQuarter a) (MkQuarter b) = fmap MkQuarter (enumFromThen a b)
+    enumFromTo (MkQuarter a) (MkQuarter b) = fmap MkQuarter (enumFromTo a b)
+    enumFromThenTo (MkQuarter a) (MkQuarter b) (MkQuarter c) =
+        fmap MkQuarter (enumFromThenTo a b c)
+
+instance Ix Quarter where
+    range (MkQuarter a, MkQuarter b) = fmap MkQuarter (range (a, b))
+    index (MkQuarter a, MkQuarter b) (MkQuarter c) = index (a, b) c
+    inRange (MkQuarter a, MkQuarter b) (MkQuarter c) = inRange (a, b) c
+    rangeSize (MkQuarter a, MkQuarter b) = rangeSize (a, b)
 
 -- | Show as @yyyy-Qn@.
 instance Show Quarter where
