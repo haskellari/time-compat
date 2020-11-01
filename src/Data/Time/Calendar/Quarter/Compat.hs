@@ -12,11 +12,24 @@ module Data.Time.Calendar.Quarter.Compat (
 #endif
     monthOfYearQuarter,
     monthQuarter,
-    dayQuarter
+    dayQuarter,
+    -- * time-compat extras
+    fromYearQuarter,
+    toYearQuarter,
 ) where
 
 #if MIN_VERSION_time(1,11,0)
+import Data.Time.Calendar (Year)
 import Data.Time.Calendar.Quarter
+
+-- | Part of @YearQuarter@ pattern
+fromYearQuarter :: Year -> QuarterOfYear -> Quarter
+fromYearQuarter = YearQuarter
+
+-- | Part of @YearQuarter@ pattern
+toYearQuarter :: Quarter -> (Year, QuarterOfYear)
+toYearQuarter (YearQuarter y m) = (y, m)
+
 #else
 
 import Data.Data                       (Data)
@@ -85,7 +98,7 @@ instance Ix Quarter where
 
 -- | Show as @yyyy-Qn@.
 instance Show Quarter where
-    show q = case fromYearQuarter q of
+    show q = case toYearQuarter q of
       (y, qy) -> show4 y ++ "-" ++ show qy
 
 -- | Read as @yyyy-Qn@.
@@ -94,7 +107,7 @@ instance Read Quarter where
         y <- readPrec
         _ <- lift $ char '-'
         m <- readPrec
-        return $ toYearQuarter y m
+        return $ fromYearQuarter y m
 
 addQuarters :: Integer -> Quarter -> Quarter
 addQuarters n (MkQuarter a) = MkQuarter $ a + n
@@ -105,8 +118,8 @@ diffQuarters (MkQuarter a) (MkQuarter b) = a - b
 #if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor.
 pattern YearQuarter :: Year -> QuarterOfYear -> Quarter
-pattern YearQuarter y qy <- (fromYearQuarter -> (y, qy))
-  where YearQuarter y qy = toYearQuarter y qy
+pattern YearQuarter y qy <- (toYearQuarter -> (y, qy))
+  where YearQuarter y qy = fromYearQuarter y qy
 
 #if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearQuarter #-}
@@ -120,35 +133,20 @@ monthOfYearQuarter my | my <= 9 = Q3
 monthOfYearQuarter _ = Q4
 
 monthQuarter :: Month -> Quarter
-monthQuarter m = case fromYearMonth m of
-    (y, my) -> toYearQuarter y $ monthOfYearQuarter my
+monthQuarter m = case toYearMonth m of
+    (y, my) -> fromYearQuarter y $ monthOfYearQuarter my
 
 dayQuarter :: Day -> Quarter
 dayQuarter d = case toMonthDay d of
     (m, _) -> monthQuarter m
 
 -- | Part of @YearQuarter@ pattern
-toYearQuarter :: Year -> QuarterOfYear -> Quarter
-toYearQuarter y qy = MkQuarter $ y * 4 + toInteger (pred $ fromEnum qy)
+fromYearQuarter :: Year -> QuarterOfYear -> Quarter
+fromYearQuarter y qy = MkQuarter $ y * 4 + toInteger (pred $ fromEnum qy)
 
 -- | Part of @YearQuarter@ pattern
-fromYearQuarter :: Quarter -> (Year, QuarterOfYear)
-fromYearQuarter (MkQuarter y) = case divMod' y 4 of
+toYearQuarter :: Quarter -> (Year, QuarterOfYear)
+toYearQuarter (MkQuarter y) = case divMod' y 4 of
     (y, qy) -> (y, toEnum (succ (fromInteger qy)))
-
-
--- | Part of 'MonthDay' pattern
-toMonthDay :: Day -> (Month,DayOfMonth)
-toMonthDay d = case toGregorian d of 
-    (y, my, dm) -> (toYearMonth y my, dm)
-
--- | Part of @YearMonth@ pattern
-toYearMonth :: Year -> MonthOfYear -> Month
-toYearMonth y my = MkMonth $ (y * 12) + toInteger (pred $ clip 1 12 my)
-
--- | Part of @YearMonth@ pattern
-fromYearMonth :: Month -> (Year, MonthOfYear)
-fromYearMonth (MkMonth m) = case divMod' m 12 of
-    (y, my) -> (y, succ (fromInteger my))
 
 #endif
