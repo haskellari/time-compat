@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 module Data.Time.Orphans () where
@@ -22,6 +23,12 @@ import Data.Fixed (Pico)
 import Text.Read (Read (..))
 import Text.ParserCombinators.ReadP
 import Text.ParserCombinators.ReadPrec
+#endif
+
+#if MIN_VERSION_time(1,11,0)
+import Data.Ix (Ix (..))
+import Data.Time.Calendar.Month
+import Data.Time.Calendar.Quarter
 #endif
 
 #if !MIN_VERSION_time(1,4,0)
@@ -92,6 +99,18 @@ deriving instance Typeable SystemTime
 deriving instance Data SystemTime
 #endif
 
+-- TODO: add an upper bound when it's known
+#if MIN_VERSION_time(1,9,0)
+instance NFData DayOfWeek where
+    rnf !_ = ()
+#endif
+
+-- TODO: add an upper bound when it's known
+#if MIN_VERSION_time(1,9,0)
+instance NFData CalendarDiffTime where
+    rnf (CalendarDiffTime x y) = rnf x `seq` rnf y
+#endif
+
 #if !MIN_VERSION_time(1,11,0)
 
 instance Read DiffTime where
@@ -106,4 +125,53 @@ instance Read NominalDiffTime where
         _ <- lift $ char 's'
         return $ realToFrac t
 
+#endif
+
+-- TODO: add an upper bound when it's known
+#if MIN_VERSION_time(1,11,0)
+instance NFData Month where
+    rnf (MkMonth m) = rnf m
+
+instance Enum Month where
+    succ (MkMonth a) = MkMonth (succ a)
+    pred (MkMonth a) = MkMonth (pred a)
+    toEnum = MkMonth . toEnum
+    fromEnum (MkMonth a) = fromEnum a
+    enumFrom (MkMonth a) = fmap MkMonth (enumFrom a)
+    enumFromThen (MkMonth a) (MkMonth b) = fmap MkMonth (enumFromThen a b)
+    enumFromTo (MkMonth a) (MkMonth b) = fmap MkMonth (enumFromTo a b)
+    enumFromThenTo (MkMonth a) (MkMonth b) (MkMonth c) =
+        fmap MkMonth (enumFromThenTo a b c)
+
+instance Ix Month where
+    range (MkMonth a, MkMonth b) = fmap MkMonth (range (a, b))
+    index (MkMonth a, MkMonth b) (MkMonth c) = index (a, b) c
+    inRange (MkMonth a, MkMonth b) (MkMonth c) = inRange (a, b) c
+    rangeSize (MkMonth a, MkMonth b) = rangeSize (a, b)
+
+instance NFData QuarterOfYear where
+    rnf Q1 = ()
+    rnf Q2 = ()
+    rnf Q3 = ()
+    rnf Q4 = ()
+
+instance NFData Quarter where
+    rnf (MkQuarter m) = rnf m
+
+instance Enum Quarter where
+    succ (MkQuarter a) = MkQuarter (succ a)
+    pred (MkQuarter a) = MkQuarter (pred a)
+    toEnum = MkQuarter . toEnum
+    fromEnum (MkQuarter a) = fromEnum a
+    enumFrom (MkQuarter a) = fmap MkQuarter (enumFrom a)
+    enumFromThen (MkQuarter a) (MkQuarter b) = fmap MkQuarter (enumFromThen a b)
+    enumFromTo (MkQuarter a) (MkQuarter b) = fmap MkQuarter (enumFromTo a b)
+    enumFromThenTo (MkQuarter a) (MkQuarter b) (MkQuarter c) =
+        fmap MkQuarter (enumFromThenTo a b c)
+
+instance Ix Quarter where
+    range (MkQuarter a, MkQuarter b) = fmap MkQuarter (range (a, b))
+    index (MkQuarter a, MkQuarter b) (MkQuarter c) = index (a, b) c
+    inRange (MkQuarter a, MkQuarter b) (MkQuarter c) = inRange (a, b) c
+    rangeSize (MkQuarter a, MkQuarter b) = rangeSize (a, b)
 #endif
