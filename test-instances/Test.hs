@@ -79,6 +79,7 @@ _NFDataInstances =
     , test (undefined :: UTCTime)
     , test (undefined :: UniversalTime)
     , test (undefined :: CalendarDiffTime)
+    , test (undefined :: CalendarDiffDays)
     , test (undefined :: TimeZone)
     , test (undefined :: TimeOfDay)
     , test (undefined :: LocalTime)

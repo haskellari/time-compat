@@ -1,3 +1,8 @@
+# 1.9.5
+
+- Support `time-1.11.1`
+  - Add `NFData CalandarDiffDays` instance
+
 # 1.9.4
 
 - Support `time-1.11`

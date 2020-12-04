@@ -52,10 +52,10 @@ import Data.Time.Calendar.WeekDate.Compat
 import System.Locale (TimeLocale (..))
 #endif
 
-import Data.Data      (Data, Typeable)
-import Data.Monoid    (Monoid (..))
-import Data.Semigroup (Semigroup (..))
-
+import Control.DeepSeq (NFData (..))
+import Data.Data       (Data, Typeable)
+import Data.Monoid     (Monoid (..))
+import Data.Semigroup  (Semigroup (..))
 
 -------------------------------------------------------------------------------
 -- CalendarDiffTime
@@ -91,6 +91,9 @@ instance Monoid CalendarDiffDays where
 
 instance Show CalendarDiffDays where
     show (CalendarDiffDays m d) = "P" ++ show m ++ "M" ++ show d ++ "D"
+
+instance NFData CalendarDiffDays where
+    rnf (CalendarDiffDays x y) = rnf x `seq` rnf y
 
 calendarDay :: CalendarDiffDays
 calendarDay = CalendarDiffDays 0 1
