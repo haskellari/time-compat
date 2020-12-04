@@ -99,16 +99,15 @@ deriving instance Typeable SystemTime
 deriving instance Data SystemTime
 #endif
 
--- TODO: add an upper bound when it's known
-#if MIN_VERSION_time(1,9,0)
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,11,1)
 instance NFData DayOfWeek where
     rnf !_ = ()
-#endif
 
--- TODO: add an upper bound when it's known
-#if MIN_VERSION_time(1,9,0)
 instance NFData CalendarDiffTime where
     rnf (CalendarDiffTime x y) = rnf x `seq` rnf y
+
+instance NFData CalendarDiffDays where
+    rnf (CalendarDiffDays x y) = rnf x `seq` rnf y
 #endif
 
 #if !MIN_VERSION_time(1,11,0)
@@ -127,8 +126,7 @@ instance Read NominalDiffTime where
 
 #endif
 
--- TODO: add an upper bound when it's known
-#if MIN_VERSION_time(1,11,0)
+#if MIN_VERSION_time(1,11,0) && !MIN_VERSION_time(1,11,1)
 instance NFData Month where
     rnf (MkMonth m) = rnf m
 

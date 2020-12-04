@@ -1,5 +1,9 @@
 branches: master
 
+constraint-set time-1.11.1
+  ghc: >= 8.0 && <8.11
+  constraints: time ==1.11.1
+
 constraint-set time-1.11
   ghc: >= 8.0 && <8.11
   constraints: time ==1.11
