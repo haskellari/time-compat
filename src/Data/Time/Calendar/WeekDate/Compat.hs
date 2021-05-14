@@ -41,6 +41,7 @@ import Data.Time.Calendar.OrdinalDate
 #endif
 
 import Control.DeepSeq (NFData (..))
+import Data.Hashable (Hashable (..))
 
 
 #if !MIN_VERSION_time(1,11,0)
@@ -135,6 +136,9 @@ data DayOfWeek
 
 instance NFData DayOfWeek where
     rnf !_ = ()
+
+instance Hashable DayOfWeek where
+    hashWithSalt salt = hashWithSalt salt . fromEnum
 
 -- | \"Circular\", so for example @[Tuesday ..]@ gives an endless sequence.
 -- Also: 'fromEnum' gives [1 .. 7] for [Monday .. Sunday], and 'toEnum' performs mod 7 to give a cycle of days.

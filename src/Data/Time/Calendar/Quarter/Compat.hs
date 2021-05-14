@@ -40,6 +40,7 @@ import Text.ParserCombinators.ReadPrec (lift)
 import Text.ParserCombinators.ReadP    (char)
 import Control.DeepSeq (NFData (..))
 import Data.Ix (Ix (..))
+import Data.Hashable (Hashable (..))
 
 import Data.Time.Calendar
 import Data.Time.Calendar.Types
@@ -54,6 +55,9 @@ instance NFData QuarterOfYear where
     rnf Q2 = ()
     rnf Q3 = ()
     rnf Q4 = ()
+
+instance Hashable QuarterOfYear where
+    hashWithSalt salt = hashWithSalt salt . fromEnum
 
 -- | maps Q1..Q4 to 1..4
 instance Enum QuarterOfYear where
@@ -78,6 +82,9 @@ newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable)
 
 instance NFData Quarter where
     rnf (MkQuarter m) = rnf m
+
+instance Hashable Quarter where
+    hashWithSalt salt (MkQuarter x) = hashWithSalt salt x
 
 instance Enum Quarter where
     succ (MkQuarter a) = MkQuarter (succ a)

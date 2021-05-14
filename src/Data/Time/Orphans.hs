@@ -13,6 +13,13 @@ import Data.Time
 import Data.Time.Clock
 import Data.Time.Clock.TAI
 import Data.Time.Format
+import Data.Hashable (Hashable (..))
+
+#if MIN_VERSION_time(1,5,0)
+import Data.Time.Format (TimeLocale (..))
+#else
+import System.Locale (TimeLocale (..))
+#endif
 
 #if MIN_VERSION_time(1,8,0)
 import Data.Time.Clock.System
@@ -140,4 +147,63 @@ instance Ix Quarter where
     index (MkQuarter a, MkQuarter b) (MkQuarter c) = index (a, b) c
     inRange (MkQuarter a, MkQuarter b) (MkQuarter c) = inRange (a, b) c
     rangeSize (MkQuarter a, MkQuarter b) = rangeSize (a, b)
+#endif
+
+-------------------------------------------------------------------------------
+-- Hashable
+-------------------------------------------------------------------------------
+
+instance Hashable UniversalTime where
+    hashWithSalt salt = hashWithSalt salt . getModJulianDate
+
+instance Hashable DiffTime where
+    hashWithSalt salt = hashWithSalt salt . toRational
+
+instance Hashable UTCTime where
+    hashWithSalt salt (UTCTime d dt) =
+        salt `hashWithSalt` d `hashWithSalt` dt
+
+instance Hashable NominalDiffTime where
+    hashWithSalt salt = hashWithSalt salt . toRational
+
+instance Hashable Day where
+    hashWithSalt salt (ModifiedJulianDay d) = hashWithSalt salt d
+
+instance Hashable TimeZone where
+    hashWithSalt salt (TimeZone m s n) =
+        salt `hashWithSalt` m `hashWithSalt` s `hashWithSalt` n
+
+instance Hashable TimeOfDay where
+    hashWithSalt salt (TimeOfDay h m s) =
+        salt `hashWithSalt` h `hashWithSalt` m `hashWithSalt` s
+
+instance Hashable LocalTime where
+    hashWithSalt salt (LocalTime d tod) =
+        salt `hashWithSalt` d `hashWithSalt` tod
+
+instance Hashable TimeLocale where
+    hashWithSalt salt (TimeLocale a b c d e f g h) =
+      salt `hashWithSalt` a
+           `hashWithSalt` b
+           `hashWithSalt` c
+           `hashWithSalt` d
+           `hashWithSalt` e
+           `hashWithSalt` f
+           `hashWithSalt` g
+           `hashWithSalt` h
+
+#if MIN_VERSION_time(1,9,0)
+instance Hashable DayOfWeek where
+    hashWithSalt salt = hashWithSalt salt . fromEnum
+#endif
+
+#if MIN_VERSION_time(1,11,0)
+instance Hashable Month where
+    hashWithSalt salt (MkMonth x) = hashWithSalt salt x
+
+instance Hashable Quarter where
+    hashWithSalt salt (MkQuarter x) = hashWithSalt salt x
+
+instance Hashable QuarterOfYear where
+    hashWithSalt salt = hashWithSalt salt . fromEnum
 #endif
