@@ -61,7 +61,7 @@ import Data.Semigroup  (Semigroup (..))
 -- CalendarDiffTime
 -------------------------------------------------------------------------------
 
-#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_base(1,9,2)
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,9,2)
 deriving instance Typeable CalendarDiffDays
 deriving instance Data CalendarDiffDays
 #endif

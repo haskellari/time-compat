@@ -66,9 +66,5 @@ getTime_resolution = 1E-6 -- microsecond
 #if !MIN_VERSION_time(1,6,0)
 -- | Get the number of picoseconds in a 'DiffTime'.
 diffTimeToPicoseconds :: DiffTime -> Integer
-#if MIN_VERSION_time(1,4,0)
 diffTimeToPicoseconds = truncate . (1000000000000 *)
-#else
-diffTimeToPicoseconds = truncate . toRational . (1000000000000 *)
-#endif
 #endif

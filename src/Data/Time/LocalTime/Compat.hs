@@ -79,7 +79,7 @@ sinceMidnight = timeOfDayToTime
 -- CalendarDiffTime
 -------------------------------------------------------------------------------
 
-#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_base(1,9,2)
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,9,2)
 deriving instance Typeable CalendarDiffTime
 deriving instance Data CalendarDiffTime
 #endif
