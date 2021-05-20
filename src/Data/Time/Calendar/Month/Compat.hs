@@ -60,6 +60,7 @@ import Text.Read
 import Text.ParserCombinators.ReadP
 import Control.DeepSeq (NFData (..))
 import Data.Ix (Ix (..))
+import Data.Hashable (Hashable (..))
 
 -- | An absolute count of common calendar months.
 -- Number is equal to @(year * 12) + (monthOfYear - 1)@.
@@ -67,6 +68,9 @@ newtype Month = MkMonth Integer deriving (Eq, Ord, Data, Typeable)
 
 instance NFData Month where
     rnf (MkMonth m) = rnf m
+
+instance Hashable Month where
+    hashWithSalt salt (MkMonth x) = hashWithSalt salt x
 
 instance Enum Month where
     succ (MkMonth a) = MkMonth (succ a)

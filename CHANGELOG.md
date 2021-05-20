@@ -1,3 +1,10 @@
+# 1.9.6
+
+- Move `Hashable` instance here from `hashable-time` package.
+  Note: `ZonedTime` instance is dropped, as `ZonedTime` doesn't have `Eq`
+  instance.
+- Drop GHC-7.0 and GHC-7.2 support.
+
 # 1.9.5
 
 - Support `time-1.11.1`
