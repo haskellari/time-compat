@@ -1,3 +1,7 @@
+# 1.9.6.1
+
+- Support `time-1.12`.
+
 # 1.9.6
 
 - Move `Hashable` instance here from `hashable-time` package.

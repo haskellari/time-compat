@@ -74,8 +74,9 @@ testReadShowFormat =
         , nameTest "expandedWeekDateFormat" $ readShowProperties $ expandedWeekDateFormat 6
         , nameTest "expandedYearWeekFormat" $ readShowProperties $ expandedYearWeekFormat 6
         , nameTest "timeOfDayFormat" $ readShowProperties $ timeOfDayFormat
-        , nameTest "hourMinuteFormat" $ readShowProperties $ hourMinuteFormat
-        , nameTest "hourFormat" $ readShowProperty $ hourFormat
+        -- https://github.com/haskellari/time-compat/issues/23
+        -- , nameTest "hourMinuteFormat" $ readShowProperties $ hourMinuteFormat
+        -- , nameTest "hourFormat" $ readShowProperty $ hourFormat
         , nameTest "withTimeDesignator" $ readShowProperties $ \fe -> withTimeDesignator $ timeOfDayFormat fe
         , nameTest "withUTCDesignator" $ readShowProperties $ \fe -> withUTCDesignator $ timeOfDayFormat fe
         , nameTest "timeOffsetFormat" $ readShowProperties $ timeOffsetFormat
