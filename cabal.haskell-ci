@@ -2,11 +2,11 @@ distribution: bionic
 branches: master
 
 constraint-set time-1.12
-  ghc: >= 8.8 && <9.0
+  ghc: >= 8.8 && <9.3
   constraints: time ==1.12
 
 constraint-set time-1.11.1
-  ghc: >= 8.0 && <8.11
+  ghc: >= 8.0 && <9.3
   constraints: time ==1.11.1
 
 constraint-set time-1.11
