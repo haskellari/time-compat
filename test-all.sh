@@ -25,10 +25,12 @@ testbuild() {
 	$OPERATION --builddir="dist-newstyle/ghc-$1-time-$2" --with-compiler="ghc-$1" --constraint="time == $2"
 }
 
+testbuild 9.2.1  1.12
 testbuild 9.0.1  1.12
 testbuild 8.10.4 1.12
 testbuild 8.8.4  1.12
 
+testbuild 9.2.1  1.11.1
 testbuild 9.0.1  1.11.1
 testbuild 8.10.4 1.11.1
 testbuild 8.8.4  1.11.1
