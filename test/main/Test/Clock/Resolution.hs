@@ -25,7 +25,7 @@ gcdAll :: Real a => [a] -> a
 gcdAll = foldr gcd' 0
 
 testResolution :: (Show dt, Real dt) => String -> (at -> at -> dt) -> (dt, IO at) -> TestTree
-testResolution name timeDiff (res, getTime) =
+testResolution name timeDiff (reportedRes, getTime) =
     testCase name $ do
         t0 <- getTime
         times0 <-
@@ -53,11 +53,8 @@ testResolution name timeDiff (res, getTime) =
                 threadDelay 1000 -- 1ms
                 getTime
         let times = fmap (\t -> timeDiff t t0) $ times0 ++ times1 ++ times2 ++ times3 ++ times4
-#if MIN_VERSION_time(1,8,0)
-        assertEqual "resolution" res $ gcdAll times
-#else
-        assertBool ("resolution " ++ show (res, gcdAll times)) (res >= gcdAll times)
-#endif
+            foundGrid = gcdAll times
+        assertBool ("resolution " ++ show (reportedRes, foundGrid)) (foundGrid <= reportedRes)
 
 testResolutions :: TestTree
 testResolutions =
