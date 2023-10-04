@@ -1,5 +1,6 @@
 distribution: bionic
 branches: master
+head-hackage: False
 
 constraint-set time-1.12
   ghc: >= 8.8 && <9.3
