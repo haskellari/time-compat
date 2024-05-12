@@ -80,11 +80,7 @@ formatReadPExtension ff = formatReadP (ff ExtendedFormat) +++ formatReadP (ff Ba
 
 -- | Parse a value in either extended or basic format
 parseFormatExtension :: (
-#if MIN_VERSION_base(4,9,0)
     MonadFail m
-#else
-    Monad m
-#endif
     ) => (FormatExtension -> Format t) -> String -> m t
 parseFormatExtension ff = parseReader $ formatReadPExtension ff
 
@@ -357,11 +353,7 @@ iso8601Show = formatShow iso8601Format
 
 -- | Parse the most commonly used ISO 8601 format.
 iso8601ParseM :: (
-#if MIN_VERSION_base(4,9,0)
     MonadFail m
-#else
-    Monad m
-#endif
     ,ISO8601 t) => String -> m t
 iso8601ParseM = formatParseM iso8601Format
 

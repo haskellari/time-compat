@@ -50,21 +50,3 @@ nominalDiffTimeToSeconds :: NominalDiffTime -> Pico
 nominalDiffTimeToSeconds = realToFrac
 
 #endif
-
-#if !MIN_VERSION_time(1,8,0)
--- | One day in 'NominalDiffTime'.
-nominalDay :: NominalDiffTime
-nominalDay = 86400
-#endif
-
-#if !MIN_VERSION_time(1,8,0)
--- | The resolution of 'getSystemTime', 'getCurrentTime', 'getPOSIXTime'
-getTime_resolution :: DiffTime
-getTime_resolution = 1E-6 -- microsecond
-#endif
-
-#if !MIN_VERSION_time(1,6,0)
--- | Get the number of picoseconds in a 'DiffTime'.
-diffTimeToPicoseconds :: DiffTime -> Integer
-diffTimeToPicoseconds = truncate . (1000000000000 *)
-#endif
