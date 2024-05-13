@@ -1,18 +1,12 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-#if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
-#endif
 module Data.Time.Calendar.Month.Compat (
     Month(..), addMonths, diffMonths,
-#if __GLASGOW_HASKELL__ >= 710
     pattern YearMonth,
-#endif
     fromYearMonthValid,
-#if __GLASGOW_HASKELL__ >= 710
     pattern MonthDay,
-#endif
     fromMonthDayValid,
     -- * time-compat extras
     fromYearMonth,
@@ -113,10 +107,8 @@ toSomeDay (MkMonth m) =
 
 #if MIN_VERSION_time(1,9,0)
 #define FORMAT_OPTS fo
-#elif MIN_VERSION_time(1,8,0)
-#define FORMAT_OPTS tl mpo i
 #else
-#define FORMAT_OPTS tl mpo
+#define FORMAT_OPTS tl mpo i
 #endif
 
 #if MIN_VERSION_time(1,9,0)
@@ -158,17 +150,13 @@ toYearMonth :: Month -> (Year, MonthOfYear)
 toYearMonth (MkMonth m) = case divMod' m 12 of
     (y, my) -> (y, succ (fromInteger my))
 
-#if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor.
 -- Invalid months of year will be clipped to the correct range.
 pattern YearMonth :: Year -> MonthOfYear -> Month
 pattern YearMonth y my <- (toYearMonth -> (y, my))
   where YearMonth y my = fromYearMonth y my
 
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearMonth #-}
-#endif
-#endif
 
 -- | Part of 'MonthDay' pattern
 toMonthDay :: Day -> (Month,DayOfMonth)
@@ -184,17 +172,12 @@ fromMonthDayValid :: Month -> DayOfMonth -> Maybe Day
 fromMonthDayValid m dm = case toYearMonth m of
     (y, my) -> fromGregorianValid y my dm
 
-#if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor.
 -- Invalid days of month will be clipped to the correct range.
 pattern MonthDay :: Month -> DayOfMonth -> Day
 pattern MonthDay m dm <- (toMonthDay -> (m,dm)) where
     MonthDay (YearMonth y my) dm = fromGregorian y my dm
 
-
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE MonthDay #-}
-#endif
-#endif
 
 #endif

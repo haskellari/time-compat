@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module Data.Format
     ( Productish(..)
     , Summish(..)
@@ -23,23 +22,11 @@ module Data.Format
     , decimalFormat
     ) where
 
-#if MIN_VERSION_base(4,9,0)
 import Control.Monad.Fail
 import Prelude hiding (fail)
-#endif
-#if MIN_VERSION_base(4,8,0)
 import Data.Void
-#endif
 import Data.Char
 import Text.ParserCombinators.ReadP
-
-
-#if MIN_VERSION_base(4,8,0)
-#else
-data Void
-absurd :: Void -> a
-absurd v = seq v $ error "absurd"
-#endif
 
 class IsoVariant f where
     isoMap :: (a -> b) -> (b -> a) -> f a -> f b
@@ -63,11 +50,7 @@ class IsoVariant f => Summish f where
 
 
 parseReader :: (
-#if MIN_VERSION_base(4,9,0)
     MonadFail m
-#else
-    Monad m
-#endif
     ) => ReadP t -> String -> m t
 parseReader readp s = case [ t | (t,"") <- readP_to_S readp s] of
     [t] -> return t
@@ -90,11 +73,7 @@ formatShow fmt t = case formatShowM fmt t of
 
 -- | Parse a value in the format
 formatParseM :: (
-#if MIN_VERSION_base(4,9,0)
     MonadFail m
-#else
-    Monad m
-#endif
     ) => Format t -> String -> m t
 formatParseM format = parseReader $ formatReadP format
 

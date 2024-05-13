@@ -1,9 +1,7 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-#if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
-#endif
 module Data.Time.Calendar.Compat (
     -- * Days
     Day(..),addDays,diffDays,
@@ -31,9 +29,7 @@ module Data.Time.Calendar.Compat (
 
     -- * Type aliases
     DayOfMonth, MonthOfYear, Year,
-#if __GLASGOW_HASKELL__ >= 710
     pattern YearMonthDay,
-#endif
     ) where
 
 import Data.Time.Calendar
@@ -46,10 +42,6 @@ import Data.Time.Calendar.Types
 
 #if !MIN_VERSION_time(1,9,0)
 import Data.Time.Calendar.WeekDate.Compat
-#endif
-
-#if !MIN_VERSION_time(1,5,0)
-import System.Locale (TimeLocale (..))
 #endif
 
 import Control.DeepSeq (NFData (..))
@@ -71,14 +63,7 @@ deriving instance Data CalendarDiffDays
 data CalendarDiffDays = CalendarDiffDays
     { cdMonths :: Integer
     , cdDays :: Integer
-    } deriving (Eq,
-    Data
-#if __GLASGOW_HASKELL__ >= 802
-#endif
-    ,Typeable
-#if __GLASGOW_HASKELL__ >= 802
-#endif
-    )
+    } deriving (Eq, Data, Typeable)
 
 -- | Additive
 instance Semigroup CalendarDiffDays where
@@ -161,17 +146,13 @@ diffGregorianDurationRollOver day2 day1 = let
 #endif
 
 #if !MIN_VERSION_time(1,11,0)
-#if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor for the proleptic Gregorian calendar.
 -- Invalid values will be clipped to the correct range, month first, then day.
 pattern YearMonthDay :: Year -> MonthOfYear -> DayOfMonth -> Day
 pattern YearMonthDay y m d <- (toGregorian -> (y,m,d)) where
     YearMonthDay y m d = fromGregorian y m d
 
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearMonthDay #-}
-#endif
-#endif
 #endif
 
 -------------------------------------------------------------------------------

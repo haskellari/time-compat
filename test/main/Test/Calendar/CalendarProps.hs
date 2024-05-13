@@ -3,7 +3,6 @@ module Test.Calendar.CalendarProps
     ( testCalendarProps
     ) where
 
-#if __GLASGOW_HASKELL__ >= 710
 import Data.Time.Calendar.Month.Compat
 import Data.Time.Calendar.Quarter.Compat
 import Test.TestUtil
@@ -24,11 +23,3 @@ testYearQuarter = nameTest "YearQuarter" $ \q -> case q of
 
 testCalendarProps :: TestTree
 testCalendarProps = nameTest "calender-props" [testYearMonth,testMonthDay,testYearQuarter]
-#else
-
-import Test.Tasty
-
-testCalendarProps :: TestTree
-testCalendarProps = testGroup "calendar-props" []
-
-#endif

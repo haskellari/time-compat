@@ -1,10 +1,8 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE BangPatterns       #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-#if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
-#endif
 module Data.Time.Calendar.WeekDate.Compat (
     Year, WeekOfYear, DayOfWeek(..), dayOfWeek,
     FirstWeekType (..),
@@ -16,9 +14,7 @@ module Data.Time.Calendar.WeekDate.Compat (
     -- * ISO 8601 Week Date format
     toWeekDate,
     fromWeekDate,
-#if __GLASGOW_HASKELL__ >= 710
     pattern YearWeekDay,
-#endif
     fromWeekDateValid,
     showWeekDate,
 ) where
@@ -108,17 +104,13 @@ fromWeekCalendarValid wt ws y wy dw = let
     d = fromWeekCalendar wt ws y wy dw
     in if toWeekCalendar wt ws d == (y,wy,dw) then Just d else Nothing
 
-#if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor for ISO 8601 Week Date format.
 -- Invalid week values will be clipped to the correct range.
 pattern YearWeekDay :: Year -> WeekOfYear -> DayOfWeek -> Day
 pattern YearWeekDay y wy dw <- (toWeekDate -> (y,wy,toEnum -> dw)) where
     YearWeekDay y wy dw = fromWeekDate y wy (fromEnum dw)
 
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearWeekDay #-}
-#endif
-#endif
 
 #endif
 
@@ -178,11 +170,7 @@ dayOfWeek (ModifiedJulianDay d) = toEnum $ fromInteger $ d + 3
 toSomeDay :: DayOfWeek -> Day
 toSomeDay d = ModifiedJulianDay (fromIntegral $ fromEnum d + 4)
 
-#if MIN_VERSION_time(1,8,0)
 #define FORMAT_OPTS tl mpo i
-#else
-#define FORMAT_OPTS tl mpo
-#endif
 
 instance FormatTime DayOfWeek where
     formatCharacter 'u' = fmap (\f FORMAT_OPTS d -> f FORMAT_OPTS (toSomeDay d)) (formatCharacter 'u')

@@ -1,15 +1,11 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-#if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
-#endif
 module Data.Time.Calendar.Quarter.Compat (
     QuarterOfYear(..), addQuarters, diffQuarters,
     Quarter(..),
-#if __GLASGOW_HASKELL__ >= 710
     pattern YearQuarter,
-#endif
     monthOfYearQuarter,
     monthQuarter,
     dayQuarter,
@@ -122,16 +118,12 @@ addQuarters n (MkQuarter a) = MkQuarter $ a + n
 diffQuarters :: Quarter -> Quarter -> Integer
 diffQuarters (MkQuarter a) (MkQuarter b) = a - b
 
-#if __GLASGOW_HASKELL__ >= 710
 -- | Bidirectional abstract constructor.
 pattern YearQuarter :: Year -> QuarterOfYear -> Quarter
 pattern YearQuarter y qy <- (toYearQuarter -> (y, qy))
   where YearQuarter y qy = fromYearQuarter y qy
 
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE YearQuarter #-}
-#endif
-#endif
 
 monthOfYearQuarter :: MonthOfYear -> QuarterOfYear
 monthOfYearQuarter my | my <= 3 = Q1

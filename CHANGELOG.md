@@ -1,3 +1,7 @@
+# 1.9.7
+
+- Drop support for GHCs prior 8.6.5
+
 # 1.9.6.1
 
 - Support `time-1.12`.

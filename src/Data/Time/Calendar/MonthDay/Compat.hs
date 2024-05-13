@@ -1,12 +1,8 @@
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE PatternSynonyms #-}
-#endif
 module Data.Time.Calendar.MonthDay.Compat (
     MonthOfYear, DayOfMonth, DayOfYear,
-#if __GLASGOW_HASKELL__ >= 710
     -- patterns
-#endif
     monthAndDayToDayOfYear,
     monthAndDayToDayOfYearValid,
     dayOfYearToMonthAndDay,
@@ -23,7 +19,6 @@ import Data.Time.Calendar.Types
 
 {-
 #if !MIN_VERSION_time(1,12,0)
-#if __GLASGOW_HASKELL__ >= 710
 pattern January :: MonthOfYear
 pattern January = 1
 
@@ -61,9 +56,6 @@ pattern November = 11
 pattern December :: MonthOfYear
 pattern December = 12
 
-#if __GLASGOW_HASKELL__ >= 802
 {-# COMPLETE January, February, March, April, May, June, July, August, September, October, November, December #-}
-#endif
-#endif
 #endif
 -}

@@ -5,10 +5,6 @@ module Test.Format.ParseTime
     , test_parse_format
     ) where
 
-#if MIN_VERSION_base(4,11,0)
-#else
-import Data.Semigroup hiding (option)
-#endif
 import Control.Monad
 import Data.Char
 import Data.Maybe
@@ -24,7 +20,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck hiding (reason)
 import Test.TestUtil
-import Text.Read.Compat
+import Text.Read
 
 format :: FormatTime t => String -> t -> String
 format f t = formatTime defaultTimeLocale f t
