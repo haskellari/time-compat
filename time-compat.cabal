@@ -1,7 +1,7 @@
 cabal-version:      1.12
 name:               time-compat
 version:            1.9.7
-x-revision:         1
+x-revision:         2
 synopsis:           Compatibility package for time
 description:
   This packages tries to compat as much of @time@ features as possible.
@@ -121,7 +121,7 @@ test-suite main
     , tagged            >=0.8.6  && <0.9
     , tasty             >=1.5    && <1.6
     , tasty-hunit       >=0.10   && <0.11
-    , tasty-quickcheck  >=0.10   && <0.11
+    , tasty-quickcheck  >=0.10   && <0.12
     , time-compat
 
   if !impl(ghc >=8.0)
