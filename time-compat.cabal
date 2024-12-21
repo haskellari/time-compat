@@ -44,7 +44,7 @@ library
   other-extensions:   CPP
   default-extensions: Trustworthy
   build-depends:
-      base          >=4.12    && <4.21
+      base          >=4.12    && <4.22
     , base-orphans  >=0.9.2   && <0.10
     , deepseq       >=1.4.4.0 && <1.6
     , hashable      >=1.4.4.0 && <1.6
