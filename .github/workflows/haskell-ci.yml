@@ -273,6 +273,12 @@ jobs:
           if [ $((HCNUMVER >= 80800 && HCNUMVER < 90400)) -ne 0 ] ; then cabal-plan topo | sort ; fi
           if [ $((HCNUMVER >= 80800 && HCNUMVER < 90400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --constraint='time ==1.12' --dependencies-only -j2 all ; fi
           if [ $((HCNUMVER >= 80800 && HCNUMVER < 90400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --constraint='time ==1.12' all ; fi
+      - name: constraint set time-1.14
+        run: |
+          if [ $((HCNUMVER >= 90002)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --constraint='time ==1.14' all --dry-run ; fi
+          if [ $((HCNUMVER >= 90002)) -ne 0 ] ; then cabal-plan topo | sort ; fi
+          if [ $((HCNUMVER >= 90002)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --constraint='time ==1.14' --dependencies-only -j2 all ; fi
+          if [ $((HCNUMVER >= 90002)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --constraint='time ==1.14' all ; fi
       - name: save cache
         uses: actions/cache/save@v4
         if: always()
