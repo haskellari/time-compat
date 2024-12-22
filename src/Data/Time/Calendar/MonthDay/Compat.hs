@@ -1,8 +1,18 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE PatternSynonyms #-}
 module Data.Time.Calendar.MonthDay.Compat (
     MonthOfYear, DayOfMonth, DayOfYear,
-    -- patterns
+    pattern January,
+    pattern February,
+    pattern March,
+    pattern April,
+    pattern May,
+    pattern June,
+    pattern July,
+    pattern August,
+    pattern September,
+    pattern October,
+    pattern November,
+    pattern December,
     monthAndDayToDayOfYear,
     monthAndDayToDayOfYearValid,
     dayOfYearToMonthAndDay,
@@ -17,7 +27,6 @@ import Data.Time.Calendar.MonthDay
 import Data.Time.Calendar.Types
 #endif
 
-{-
 #if !MIN_VERSION_time(1,12,0)
 pattern January :: MonthOfYear
 pattern January = 1
@@ -58,4 +67,3 @@ pattern December = 12
 
 {-# COMPLETE January, February, March, April, May, June, July, August, September, October, November, December #-}
 #endif
--}

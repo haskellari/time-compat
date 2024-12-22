@@ -1,12 +1,12 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
 module Data.Time.Orphans () where
 
 import Data.Orphans ()
 
 import Control.DeepSeq (NFData (..))
+import Data.Ix (Ix)
 import Data.Typeable (Typeable)
 import Data.Data (Data)
 import Data.Time
@@ -29,6 +29,13 @@ import Text.ParserCombinators.ReadPrec
 import Data.Ix (Ix (..))
 import Data.Time.Calendar.Month
 import Data.Time.Calendar.Quarter
+import Data.Time.Calendar.WeekDate
+#endif
+
+#if !MIN_VERSION_time(1,14,0)
+import GHC.Generics (Generic)
+import qualified Language.Haskell.TH.Syntax as TH
+import Data.Fixed (Fixed (..), Pico)
 #endif
 
 #if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,11,0)
@@ -52,6 +59,8 @@ instance NFData CalendarDiffTime where
 
 instance NFData CalendarDiffDays where
     rnf (CalendarDiffDays x y) = rnf x `seq` rnf y
+
+deriving instance Ix DayOfWeek
 #endif
 
 #if !MIN_VERSION_time(1,11,0)
@@ -116,6 +125,78 @@ instance Ix Quarter where
     index (MkQuarter a, MkQuarter b) (MkQuarter c) = index (a, b) c
     inRange (MkQuarter a, MkQuarter b) (MkQuarter c) = inRange (a, b) c
     rangeSize (MkQuarter a, MkQuarter b) = rangeSize (a, b)
+
+deriving instance Ix QuarterOfYear
+#endif
+
+-------------------------------------------------------------------------------
+-- Lift & Generic
+-------------------------------------------------------------------------------
+
+#if !MIN_VERSION_time(1,14,0)
+deriving instance TH.Lift Day
+deriving instance TH.Lift UTCTime
+deriving instance TH.Lift UniversalTime
+
+deriving instance Generic Day
+deriving instance Generic LocalTime
+deriving instance Generic TimeOfDay
+deriving instance Generic TimeZone
+deriving instance Generic UTCTime
+deriving instance Generic UniversalTime
+deriving instance Generic ZonedTime
+
+#if MIN_VERSION_time(1,9,0)
+deriving instance TH.Lift DayOfWeek
+deriving instance TH.Lift CalendarDiffDays
+
+deriving instance Generic CalendarDiffDays
+deriving instance Generic CalendarDiffTime
+#endif
+
+#if MIN_VERSION_time(1,11,0)
+deriving instance Generic Quarter
+
+deriving instance TH.Lift Month
+deriving instance TH.Lift QuarterOfYear
+deriving instance TH.Lift FirstWeekType
+#endif
+
+instance TH.Lift DiffTime where
+    lift x = [| picosecondsToDiffTime x' |]
+      where
+        x' = diffTimeToPicoseconds x
+
+#if MIN_VERSION_template_haskell(2,16,0)
+    liftTyped x = [|| picosecondsToDiffTime x' ||]
+      where
+        x' = diffTimeToPicoseconds x
+#endif
+
+#if MIN_VERSION_time(1,9,1)
+instance TH.Lift NominalDiffTime where
+    lift x = [| secondsToNominalDiffTime (MkFixed x' :: Pico) |]
+      where
+        x' = case nominalDiffTimeToSeconds x of MkFixed y -> y
+
+#if MIN_VERSION_template_haskell(2,16,0)
+    liftTyped x = [|| secondsToNominalDiffTime (MkFixed x' :: Pico) ||]
+      where
+        x' = case nominalDiffTimeToSeconds x of MkFixed y -> y
+#endif
+#else
+instance TH.Lift NominalDiffTime where
+    lift x = [| realToFrac (MkFixed x' :: Pico) |]
+      where
+        x' = case realToFrac x :: Pico of MkFixed y -> y
+
+#if MIN_VERSION_template_haskell(2,16,0)
+    liftTyped x = [|| realToFrac (MkFixed x' :: Pico) ||]
+      where
+        x' = case realToFrac x :: Pico of MkFixed y -> y
+#endif
+#endif
+
 #endif
 
 -------------------------------------------------------------------------------

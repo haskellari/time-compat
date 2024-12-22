@@ -6,10 +6,11 @@ import Control.Monad
 import Data.Fixed
 import Data.Ratio
 import Data.Time.Compat
-import Data.Time.Calendar.WeekDate.Compat
 import Data.Time.Calendar.Month.Compat
 import Data.Time.Calendar.Quarter.Compat
+import Data.Time.Calendar.WeekDate.Compat
 import Data.Time.Clock.POSIX.Compat
+import System.Random
 import Test.Tasty.QuickCheck hiding (reason)
 
 instance Arbitrary DayOfWeek where
@@ -31,25 +32,33 @@ instance Arbitrary Quarter where
 instance Arbitrary QuarterOfYear where
     arbitrary = liftM toEnum $ choose (1, 4)
 
+deriving instance Random Day
+
+supportedDayRange :: (Day, Day)
+supportedDayRange = (fromGregorian (-9899) 1 1, fromGregorian 9999 12 31)
+
 instance Arbitrary Day where
-    arbitrary = liftM ModifiedJulianDay $ choose (-313698, 2973483) -- 1000-01-1 to 9999-12-31
-    shrink day = let
-        (y, m, d) = toGregorian day
-        dayShrink =
-            if d > 1
-                then [fromGregorian y m (d - 1)]
-                else []
-        monthShrink =
-            if m > 1
-                then [fromGregorian y (m - 1) d]
-                else []
-        yearShrink =
-            if y > 2000
-                then [fromGregorian (y - 1) m d]
-                else if y < 2000
-                         then [fromGregorian (y + 1) m d]
-                         else []
-        in dayShrink ++ monthShrink ++ yearShrink
+    arbitrary = choose supportedDayRange
+    shrink day =
+        let
+            (y, m, d) = toGregorian day
+            dayShrink =
+                if d > 1
+                    then [fromGregorian y m (d - 1)]
+                    else []
+            monthShrink =
+                if m > 1
+                    then [fromGregorian y (m - 1) d]
+                    else []
+            yearShrink =
+                if y > 2000
+                    then [fromGregorian (y - 1) m d]
+                    else
+                        if y < 2000
+                            then [fromGregorian (y + 1) m d]
+                            else []
+        in
+            dayShrink ++ monthShrink ++ yearShrink
 
 instance CoArbitrary Day where
     coarbitrary (ModifiedJulianDay d) = coarbitrary d
@@ -90,28 +99,32 @@ instance Arbitrary CalendarDiffTime where
 
 reduceDigits :: Int -> Pico -> Maybe Pico
 reduceDigits (-1) _ = Nothing
-reduceDigits n x = let
-    d :: Pico
-    d = 10 ^^ (negate n)
-    r = mod' x d
-    in case r of
-           0 -> reduceDigits (n - 1) x
-           _ -> Just $ x - r
+reduceDigits n x =
+    let
+        d :: Pico
+        d = 10 ^^ (negate n)
+        r = mod' x d
+    in
+        case r of
+            0 -> reduceDigits (n - 1) x
+            _ -> Just $ x - r
 
 instance Arbitrary TimeOfDay where
     arbitrary = liftM timeToTimeOfDay arbitrary
-    shrink (TimeOfDay h m s) = let
-        shrinkInt 0 = []
-        shrinkInt 1 = [0]
-        shrinkInt _ = [0, 1]
-        shrinkPico 0 = []
-        shrinkPico 1 = [0]
-        shrinkPico p =
-            case reduceDigits 12 p of
+    shrink (TimeOfDay h m s) =
+        let
+            shrinkInt 0 = []
+            shrinkInt 1 = [0]
+            shrinkInt _ = [0, 1]
+            shrinkPico 0 = []
+            shrinkPico 1 = [0]
+            shrinkPico p = case reduceDigits 12 p of
                 Just p' -> [0, 1, p']
                 Nothing -> [0, 1]
-        in [TimeOfDay h' m s | h' <- shrinkInt h] ++
-           [TimeOfDay h m' s | m' <- shrinkInt m] ++ [TimeOfDay h m s' | s' <- shrinkPico s]
+        in
+            [TimeOfDay h' m s | h' <- shrinkInt h]
+                ++ [TimeOfDay h m' s | m' <- shrinkInt m]
+                ++ [TimeOfDay h m s' | s' <- shrinkPico s]
 
 instance CoArbitrary TimeOfDay where
     coarbitrary t = coarbitrary (timeOfDayToTime t)

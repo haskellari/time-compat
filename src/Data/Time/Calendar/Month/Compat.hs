@@ -1,7 +1,4 @@
 {-# LANGUAGE CPP                #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE PatternSynonyms    #-}
-{-# LANGUAGE ViewPatterns       #-}
 module Data.Time.Calendar.Month.Compat (
     Month(..), addMonths, diffMonths,
     pattern YearMonth,
@@ -55,10 +52,11 @@ import Text.ParserCombinators.ReadP
 import Control.DeepSeq (NFData (..))
 import Data.Ix (Ix (..))
 import Data.Hashable (Hashable (..))
+import qualified Language.Haskell.TH.Syntax as TH
 
 -- | An absolute count of common calendar months.
 -- Number is equal to @(year * 12) + (monthOfYear - 1)@.
-newtype Month = MkMonth Integer deriving (Eq, Ord, Data, Typeable)
+newtype Month = MkMonth Integer deriving (Eq, Ord, Data, Typeable, TH.Lift)
 
 instance NFData Month where
     rnf (MkMonth m) = rnf m
@@ -160,7 +158,7 @@ pattern YearMonth y my <- (toYearMonth -> (y, my))
 
 -- | Part of 'MonthDay' pattern
 toMonthDay :: Day -> (Month,DayOfMonth)
-toMonthDay d = case toGregorian d of 
+toMonthDay d = case toGregorian d of
     (y, my, dm) -> (fromYearMonth y my, dm)
 
 -- | Part of 'MonthDay' pattern

@@ -1,9 +1,9 @@
-module Test.Calendar.LongWeekYears
-    ( longWeekYears
-    ) where
+module Test.Calendar.LongWeekYears (
+    longWeekYears,
+) where
 
-import Data.Time.Calendar
-import Data.Time.Calendar.WeekDate
+import Data.Time.Calendar.Compat
+import Data.Time.Calendar.WeekDate.Compat
 import Test.Calendar.LongWeekYearsRef
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -18,12 +18,14 @@ showLongYear :: Integer -> String
 showLongYear year =
     unwords
         [ show year ++ ":"
-        , (if isLeapYear year
-               then "L"
-               else " ") ++
-          (if longYear year
-               then "*"
-               else " ")
+        , ( if isLeapYear year
+                then "L"
+                else " "
+          )
+            ++ ( if longYear year
+                    then "*"
+                    else " "
+               )
         ]
 
 longWeekYears :: TestTree
