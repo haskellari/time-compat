@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
 module Data.Time.Clock.System.Compat (
     systemEpochDay,
     SystemTime(..),

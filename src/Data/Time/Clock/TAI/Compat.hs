@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP, DeriveDataTypeable #-}
 module Data.Time.Clock.TAI.Compat (
     -- * TAI arithmetic
     AbsoluteTime,taiEpoch,addAbsoluteTime,diffAbsoluteTime,

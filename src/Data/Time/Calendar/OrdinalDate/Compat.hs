@@ -1,6 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns #-}
 module Data.Time.Calendar.OrdinalDate.Compat (
     Day, Year, DayOfYear, WeekOfYear,
     toOrdinalDate,

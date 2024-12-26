@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
 module Data.Time.Clock.Compat (
     -- * Universal Time
     -- | Time as measured by the Earth.
@@ -22,7 +23,7 @@ module Data.Time.Clock.Compat (
     -- * UTC differences
     addUTCTime,
     diffUTCTime,
-  
+
     -- * Current time
     getCurrentTime,
     getTime_resolution,
@@ -38,6 +39,7 @@ import Data.Time.Calendar.Types
 
 import Data.Time.Clock
 import Data.Fixed (Pico)
+import Debug.Trace
 
 #if !MIN_VERSION_time(1,9,1)
 

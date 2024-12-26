@@ -1,10 +1,10 @@
-module Test.Calendar.Calendars
-    ( testCalendars
-    ) where
+module Test.Calendar.Calendars (
+    testCalendars,
+) where
 
-import Data.Time.Calendar
-import Data.Time.Calendar.Julian
-import Data.Time.Calendar.WeekDate
+import Data.Time.Calendar.Compat
+import Data.Time.Calendar.Julian.Compat
+import Data.Time.Calendar.WeekDate.Compat
 import Test.Calendar.CalendarsRef
 import Test.Tasty
 import Test.Tasty.HUnit

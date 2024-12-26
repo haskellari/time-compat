@@ -2,6 +2,10 @@ distribution: jammy
 branches: master
 head-hackage: False
 
+constraint-set time-1.14
+  ghc: >= 9.0
+  constraints: time ==1.14
+
 constraint-set time-1.12
   ghc: >= 8.8 && <9.3
   constraints: time ==1.12

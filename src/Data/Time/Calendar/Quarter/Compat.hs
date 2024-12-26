@@ -1,7 +1,4 @@
 {-# LANGUAGE CPP                #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE PatternSynonyms    #-}
-{-# LANGUAGE ViewPatterns       #-}
 module Data.Time.Calendar.Quarter.Compat (
     QuarterOfYear(..), addQuarters, diffQuarters,
     Quarter(..),
@@ -37,6 +34,8 @@ import Text.ParserCombinators.ReadP    (char)
 import Control.DeepSeq (NFData (..))
 import Data.Ix (Ix (..))
 import Data.Hashable (Hashable (..))
+import GHC.Generics (Generic)
+import qualified Language.Haskell.TH.Syntax as TH
 
 import Data.Time.Calendar
 import Data.Time.Calendar.Types
@@ -44,7 +43,7 @@ import Data.Time.Calendar.Private
 import Data.Time.Calendar.Month.Compat
 
 -- | Quarters of each year. Each quarter corresponds to three months.
-data QuarterOfYear = Q1 | Q2 | Q3 | Q4 deriving (Eq, Ord, Data, Typeable, Read, Show)
+data QuarterOfYear = Q1 | Q2 | Q3 | Q4 deriving (Eq, Ord, Data, Typeable, Read, Show, Ix, TH.Lift, Generic)
 
 instance NFData QuarterOfYear where
     rnf Q1 = ()
@@ -74,7 +73,7 @@ instance Bounded QuarterOfYear where
 
 -- | An absolute count of year quarters.
 -- Number is equal to @(year * 4) + (quarterOfYear - 1)@.
-newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable)
+newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable, Generic)
 
 instance NFData Quarter where
     rnf (MkQuarter m) = rnf m

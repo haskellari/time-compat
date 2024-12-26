@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, DeriveDataTypeable #-}
+{-# LANGUAGE CPP #-}
 module Data.Time.LocalTime.Compat (
     -- * Time zones
     TimeZone(..),timeZoneOffsetString,timeZoneOffsetString',minutesToTimeZone,hoursToTimeZone,utc,
@@ -35,6 +35,7 @@ import Data.Time.Orphans ()
 import Data.Time.LocalTime
 import Data.Time.Clock.Compat
 import Data.Time.Calendar.Compat
+import Data.Time.Format.Compat
 
 import Data.Fixed (Pico (..), showFixed, divMod')
 import Data.Monoid (Monoid (..))
@@ -42,6 +43,7 @@ import Data.Data (Data, Typeable)
 import Data.Semigroup (Semigroup (..))
 
 import Control.DeepSeq (NFData (..))
+import GHC.Generics (Generic)
 
 -------------------------------------------------------------------------------
 -- TimeOfDay
@@ -92,6 +94,7 @@ data CalendarDiffTime = CalendarDiffTime
     } deriving (Eq,
     Data
     ,Typeable
+    , Generic
     )
 
 -- | Additive
@@ -108,6 +111,7 @@ instance NFData CalendarDiffTime where
 instance Show CalendarDiffTime where
     show (CalendarDiffTime m t) = "P" ++ show m ++ "MT" ++ showFixed True (realToFrac t :: Pico) ++ "S"
 
+
 calendarTimeDays :: CalendarDiffDays -> CalendarDiffTime
 calendarTimeDays (CalendarDiffDays m d) = CalendarDiffTime m $ fromInteger d * nominalDay
 
@@ -118,6 +122,10 @@ calendarTimeTime dt = CalendarDiffTime 0 dt
 scaleCalendarDiffTime :: Integer -> CalendarDiffTime -> CalendarDiffTime
 scaleCalendarDiffTime k (CalendarDiffTime m d) = CalendarDiffTime (k * m) (fromInteger k * d)
 #endif
+
+-- TODO:
+-- instance Read CalendarDiffTime where
+--     readsPrec = error "TODO"
 
 -------------------------------------------------------------------------------
 -- LocalTime

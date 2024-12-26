@@ -1,15 +1,10 @@
 {-# LANGUAGE CPP                #-}
-{-# LANGUAGE BangPatterns       #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE PatternSynonyms    #-}
-{-# LANGUAGE ViewPatterns       #-}
 module Data.Time.Calendar.WeekDate.Compat (
     Year, WeekOfYear, DayOfWeek(..), dayOfWeek,
     FirstWeekType (..),
     toWeekCalendar,
     fromWeekCalendar,
     fromWeekCalendarValid,
-    
 
     -- * ISO 8601 Week Date format
     toWeekDate,
@@ -31,9 +26,12 @@ import Data.Time.Format
 #if !MIN_VERSION_time(1,11,0)
 import Data.Data (Data)
 import Data.Typeable (Typeable)
+import Data.Ix (Ix)
 import Data.Time.Calendar.Types
 import Data.Time.Calendar.Private
 import Data.Time.Calendar.OrdinalDate
+import GHC.Generics (Generic)
+import qualified Language.Haskell.TH.Syntax as TH
 #endif
 
 import Control.DeepSeq (NFData (..))
@@ -46,7 +44,7 @@ data FirstWeekType
     -- ^ first week is the first whole week of the year
     | FirstMostWeek
     -- ^ first week is the first week with four days in the year
-    deriving (Eq, Typeable)
+    deriving (Eq, Typeable, TH.Lift)
 
 firstDayOfWeekCalendar :: FirstWeekType -> DayOfWeek -> Year -> Day
 firstDayOfWeekCalendar wt dow year = let
@@ -124,7 +122,7 @@ data DayOfWeek
     | Friday
     | Saturday
     | Sunday
-    deriving (Eq, Ord, Show, Read, Typeable, Data)
+    deriving (Eq, Ord, Show, Read, Typeable, Data, Ix, TH.Lift, Generic)
 
 instance NFData DayOfWeek where
     rnf !_ = ()

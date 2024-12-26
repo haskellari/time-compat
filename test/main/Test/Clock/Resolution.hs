@@ -1,7 +1,6 @@
-{-# LANGUAGE CPP #-}
-module Test.Clock.Resolution
-    ( testResolutions
-    ) where
+module Test.Clock.Resolution (
+    testResolutions,
+) where
 
 import Control.Concurrent
 import Data.Fixed
@@ -34,32 +33,33 @@ testResolution name timeDiff (reportedRes, getTime) =
                 getTime
         times1 <-
             repeatN 100 $ -- 100us
-             do
-                threadDelay 1 -- 1us
-                getTime
+                do
+                    threadDelay 1 -- 1us
+                    getTime
         times2 <-
             repeatN 100 $ -- 1ms
-             do
-                threadDelay 10 -- 10us
-                getTime
+                do
+                    threadDelay 10 -- 10us
+                    getTime
         times3 <-
             repeatN 100 $ -- 10ms
-             do
-                threadDelay 100 -- 100us
-                getTime
+                do
+                    threadDelay 100 -- 100us
+                    getTime
         times4 <-
             repeatN 100 $ -- 100ms
-             do
-                threadDelay 1000 -- 1ms
-                getTime
-        let times = fmap (\t -> timeDiff t t0) $ times0 ++ times1 ++ times2 ++ times3 ++ times4
+                do
+                    threadDelay 1000 -- 1ms
+                    getTime
+        let
+            times = fmap (\t -> timeDiff t t0) $ times0 ++ times1 ++ times2 ++ times3 ++ times4
             foundGrid = gcdAll times
-        assertBool ("resolution " ++ show (reportedRes, foundGrid)) (foundGrid <= reportedRes)
+        assertBool ("reported resolution: " <> show reportedRes <> ", found: " <> show foundGrid) $ foundGrid <= reportedRes
 
 testResolutions :: TestTree
 testResolutions =
     testGroup "resolution" $
-    [testResolution "getCurrentTime" diffUTCTime (realToFrac getTime_resolution, getCurrentTime)] ++
-    case taiClock of
-        Just clock -> [testResolution "taiClock" diffAbsoluteTime clock]
-        Nothing -> []
+        [testResolution "getCurrentTime" diffUTCTime (realToFrac getTime_resolution, getCurrentTime)]
+            ++ case taiClock of
+                Just clock -> [testResolution "taiClock" diffAbsoluteTime clock]
+                Nothing -> []

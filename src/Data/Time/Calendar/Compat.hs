@@ -2,13 +2,42 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Data.Time.Calendar.Compat (
     -- * Days
     Day(..),addDays,diffDays,
 
+    -- * DayPeriod
+    DayPeriod (..),
+    periodAllDays,
+    periodLength,
+    periodFromDay,
+    periodToDay,
+    periodToDayValid,
+
     -- * CalendarDiffTime
     CalendarDiffDays (..),
     calendarDay,calendarWeek,calendarMonth,calendarYear,scaleCalendarDiffDays,
+
+
+    -- * Year, month and day
+    Year,
+    pattern CommonEra,
+    pattern BeforeCommonEra,
+    MonthOfYear,
+    pattern January,
+    pattern February,
+    pattern March,
+    pattern April,
+    pattern May,
+    pattern June,
+    pattern July,
+    pattern August,
+    pattern September,
+    pattern October,
+    pattern November,
+    pattern December,
+    DayOfMonth,
 
     -- * Gregorian calendar
     toGregorian,fromGregorian,fromGregorianValid,showGregorian,gregorianMonthLength,
@@ -26,17 +55,24 @@ module Data.Time.Calendar.Compat (
       -- * Week
     DayOfWeek(..), dayOfWeek,
     dayOfWeekDiff, firstDayOfWeekOnAfter,
+    weekAllDays,
+    weekFirstDay,
+    weekLastDay,
 
     -- * Type aliases
-    DayOfMonth, MonthOfYear, Year,
     pattern YearMonthDay,
-    ) where
+) where
 
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,14,0)
+import Data.Time.Calendar hiding (diffGregorianDurationRollOver)
+#else
 import Data.Time.Calendar
+#endif
+
 import Data.Time.Format
 import Data.Time.Orphans ()
 
-#if !MIN_VERSION_time(1,11,0)
+#if !MIN_VERSION_time(1,12,1)
 import Data.Time.Calendar.Types
 #endif
 
@@ -44,10 +80,25 @@ import Data.Time.Calendar.Types
 import Data.Time.Calendar.WeekDate.Compat
 #endif
 
+#if !MIN_VERSION_time(1,12,0)
+import Data.Time.Calendar.MonthDay.Compat
+#endif
+
+#if !MIN_VERSION_time(1,12,0)
+import Data.Time.Calendar.Types
+#endif
+
+#if !MIN_VERSION_time(1,12,1)
+import Data.Time.Calendar.Month.Compat
+import Data.Time.Calendar.Quarter.Compat
+#endif
+
 import Control.DeepSeq (NFData (..))
 import Data.Data       (Data, Typeable)
+import GHC.Generics   (Generic)
 import Data.Monoid     (Monoid (..))
 import Data.Semigroup  (Semigroup (..))
+import qualified Language.Haskell.TH.Syntax as TH
 
 -------------------------------------------------------------------------------
 -- CalendarDiffTime
@@ -63,7 +114,7 @@ deriving instance Data CalendarDiffDays
 data CalendarDiffDays = CalendarDiffDays
     { cdMonths :: Integer
     , cdDays :: Integer
-    } deriving (Eq, Data, Typeable)
+    } deriving (Eq, Data, Typeable, Generic, TH.Lift)
 
 -- | Additive
 instance Semigroup CalendarDiffDays where
@@ -98,6 +149,10 @@ scaleCalendarDiffDays k (CalendarDiffDays m d) = CalendarDiffDays (k * m) (k * d
 
 #endif
 
+-- TODO:
+-- instance Read CalendarDiffDays where
+--    readsPrec = error "TODO"
+
 -------------------------------------------------------------------------------
 -- Gregorian
 -------------------------------------------------------------------------------
@@ -126,23 +181,34 @@ diffGregorianDurationClip day2 day1 = let
         else if d2 <= d1 then ymdiff else ymdiff + 1
     dayAllowed = addGregorianDurationClip (CalendarDiffDays ymAllowed 0) day1
     in CalendarDiffDays ymAllowed $ diffDays day2 dayAllowed
+#endif
 
+#if !MIN_VERSION_time(1,14,0)
 -- | Calendrical difference, with as many whole months as possible.
--- Same as 'diffGregorianDurationClip' for positive durations.
 diffGregorianDurationRollOver :: Day -> Day -> CalendarDiffDays
-diffGregorianDurationRollOver day2 day1 = let
-    (y1,m1,d1) = toGregorian day1
-    (y2,m2,d2) = toGregorian day2
-    ym1 = y1 * 12 + toInteger m1
-    ym2 = y2 * 12 + toInteger m2
-    ymdiff = ym2 - ym1
-    ymAllowed =
-        if day2 >= day1 then
-        if d2 >= d1 then ymdiff else ymdiff - 1
-        else if d2 <= d1 then ymdiff else ymdiff + 1
-    dayAllowed = addGregorianDurationRollOver (CalendarDiffDays ymAllowed 0) day1
-    in CalendarDiffDays ymAllowed $ diffDays day2 dayAllowed
-
+diffGregorianDurationRollOver day2 day1 =
+    let
+        (y1, m1, _) = toGregorian day1
+        (y2, m2, _) = toGregorian day2
+        ym1 = y1 * 12 + toInteger m1
+        ym2 = y2 * 12 + toInteger m2
+        ymdiff = ym2 - ym1
+        findpos mdiff =
+            let
+                dayAllowed = addGregorianDurationRollOver (CalendarDiffDays mdiff 0) day1
+                dd = diffDays day2 dayAllowed
+            in
+                if dd >= 0 then CalendarDiffDays mdiff dd else findpos (pred mdiff)
+        findneg mdiff =
+            let
+                dayAllowed = addGregorianDurationRollOver (CalendarDiffDays mdiff 0) day1
+                dd = diffDays day2 dayAllowed
+            in
+                if dd <= 0 then CalendarDiffDays mdiff dd else findpos (succ mdiff)
+    in
+        if day2 >= day1
+            then findpos ymdiff
+            else findneg ymdiff
 #endif
 
 #if !MIN_VERSION_time(1,11,0)
@@ -168,4 +234,146 @@ dayOfWeekDiff a b = mod (fromEnum a - fromEnum b) 7
 -- | The first day-of-week on or after some day
 firstDayOfWeekOnAfter :: DayOfWeek -> Day -> Day
 firstDayOfWeekOnAfter dw d = addDays (toInteger $ dayOfWeekDiff dw $ dayOfWeek d) d
+#endif
+
+#if !MIN_VERSION_time(1,12,2)
+-- | Returns a week containing the given 'Day' where the first day is the
+-- 'DayOfWeek' specified.
+--
+-- Examples:
+--
+-- >>> weekAllDays Sunday (YearMonthDay 2022 02 21)
+-- [YearMonthDay 2022 2 20 .. YearMonthDay 2022 2 26]
+--
+-- >>> weekAllDays Monday (YearMonthDay 2022 02 21)
+-- [YearMonthDay 2022 2 21 .. YearMonthDay 2022 2 27]
+--
+-- >>> weekAllDays Tuesday (YearMonthDay 2022 02 21)
+-- [YearMonthDay 2022 2 15 .. YearMonthDay 2022 2 21]
+--
+-- @since 1.12.2
+weekAllDays :: DayOfWeek -> Day -> [Day]
+weekAllDays firstDay day = [weekFirstDay firstDay day .. weekLastDay firstDay day]
+
+-- | Returns the first day of a week containing the given 'Day'.
+--
+-- Examples:
+--
+-- >>> weekFirstDay Sunday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 20
+--
+-- >>> weekFirstDay Monday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 21
+--
+-- >>> weekFirstDay Tuesday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 15
+--
+-- @since 1.12.2
+weekFirstDay :: DayOfWeek -> Day -> Day
+weekFirstDay firstDay day = addDays (negate 7) $ firstDayOfWeekOnAfter firstDay $ succ day
+
+-- | Returns the last day of a week containing the given 'Day'.
+--
+-- Examples:
+--
+-- >>> weekLastDay Sunday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 26
+--
+-- >>> weekLastDay Monday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 27
+--
+-- >>> weekLastDay Tuesday (YearMonthDay 2022 02 21)
+-- YearMonthDay 2022 2 21
+--
+-- @since 1.12.2
+weekLastDay :: DayOfWeek -> Day -> Day
+weekLastDay firstDay day = pred $ firstDayOfWeekOnAfter firstDay $ succ day
+#endif
+
+-------------------------------------------------------------------------------
+-- Days
+-------------------------------------------------------------------------------
+
+#if !MIN_VERSION_time(1,12,1)
+class Ord p => DayPeriod p where
+    -- | Returns the first 'Day' in a period of days.
+    periodFirstDay :: p -> Day
+
+    -- | Returns the last 'Day' in a period of days.
+    periodLastDay :: p -> Day
+
+    -- | Get the period this day is in.
+    dayPeriod :: Day -> p
+
+-- | A list of all the days in this period.
+--
+-- @since 1.12.1
+periodAllDays :: DayPeriod p => p -> [Day]
+periodAllDays p = [periodFirstDay p .. periodLastDay p]
+
+-- | The number of days in this period.
+--
+-- @since 1.12.1
+periodLength :: DayPeriod p => p -> Int
+periodLength p = succ $ fromInteger $ diffDays (periodLastDay p) (periodFirstDay p)
+
+-- | Get the period this day is in, with the 1-based day number within the period.
+--
+-- @periodFromDay (periodFirstDay p) = (p,1)@
+--
+-- @since 1.12.1
+periodFromDay :: DayPeriod p => Day -> (p, Int)
+periodFromDay d =
+    let
+        p = dayPeriod d
+        dt = succ $ fromInteger $ diffDays d $ periodFirstDay p
+    in
+        (p, dt)
+
+-- | Inverse of 'periodFromDay'.
+--
+-- @since 1.12.1
+periodToDay :: DayPeriod p => p -> Int -> Day
+periodToDay p i = addDays (toInteger $ pred i) $ periodFirstDay p
+
+-- | Validating inverse of 'periodFromDay'.
+--
+-- @since 1.12.1
+periodToDayValid :: DayPeriod p => p -> Int -> Maybe Day
+periodToDayValid p i =
+    let
+        d = periodToDay p i
+    in
+        if fst (periodFromDay d) == p then Just d else Nothing
+
+instance DayPeriod Day where
+    periodFirstDay = id
+    periodLastDay = id
+    dayPeriod = id
+
+instance DayPeriod Year where
+    periodFirstDay y = YearMonthDay y January 1
+    periodLastDay y = YearMonthDay y December 31
+    dayPeriod (YearMonthDay y _ _) = y
+
+instance DayPeriod Month where
+    periodFirstDay (YearMonth y m) = YearMonthDay y m 1
+    periodLastDay (YearMonth y m) = YearMonthDay y m 31 -- clips to correct day
+    dayPeriod (YearMonthDay y my _) = YearMonth y my
+
+instance DayPeriod Quarter where
+    periodFirstDay (YearQuarter y q) =
+        case q of
+            Q1 -> periodFirstDay $ YearMonth y January
+            Q2 -> periodFirstDay $ YearMonth y April
+            Q3 -> periodFirstDay $ YearMonth y July
+            Q4 -> periodFirstDay $ YearMonth y October
+    periodLastDay (YearQuarter y q) =
+        case q of
+            Q1 -> periodLastDay $ YearMonth y March
+            Q2 -> periodLastDay $ YearMonth y June
+            Q3 -> periodLastDay $ YearMonth y September
+            Q4 -> periodLastDay $ YearMonth y December
+    dayPeriod (MonthDay m _) = monthQuarter m
+
 #endif
