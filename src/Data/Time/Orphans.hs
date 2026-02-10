@@ -32,7 +32,7 @@ import Data.Time.Calendar.Quarter
 import Data.Time.Calendar.WeekDate
 #endif
 
-#if !MIN_VERSION_time(1,14,0)
+#if !MIN_VERSION_time(1,15,0)
 import GHC.Generics (Generic)
 import qualified Language.Haskell.TH.Syntax as TH
 import Data.Fixed (Fixed (..), Pico)
@@ -132,6 +132,27 @@ deriving instance Ix QuarterOfYear
 -------------------------------------------------------------------------------
 -- Lift & Generic
 -------------------------------------------------------------------------------
+
+#if !MIN_VERSION_time(1,15,0)
+deriving instance TH.Lift LocalTime
+deriving instance TH.Lift TimeZone
+deriving instance TH.Lift ZonedTime
+
+#if MIN_VERSION_time(1,9,2)
+deriving instance TH.Lift CalendarDiffTime
+#endif
+
+#if MIN_VERSION_time(1,11,0)
+deriving instance TH.Lift Quarter
+#endif
+
+instance TH.Lift TimeOfDay where
+  lift (TimeOfDay h m (MkFixed s)) = [| TimeOfDay h m (MkFixed s) |]
+
+#if MIN_VERSION_template_haskell(2,16,0)
+  liftTyped (TimeOfDay h m (MkFixed s)) = [|| TimeOfDay h m (MkFixed s) ||]
+#endif
+#endif
 
 #if !MIN_VERSION_time(1,14,0)
 deriving instance TH.Lift Day

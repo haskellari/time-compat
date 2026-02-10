@@ -18,21 +18,4 @@ testReadShowExact t v =
     ]
 
 testCalendarDiffTime :: TestTree
-testCalendarDiffTime = testGroup "CalendarDiffTime" []
-
-{-
-    nameTest
-        "CalendarDiffTime"
-        [ testReadShowExact "P0D" $ CalendarDiffTime 0 0
-        , testReadShowExact "P1DT1S" $ CalendarDiffTime 0 $ secondsToNominalDiffTime 86401
-        , testReadShowExact "P-1DT1S" $ CalendarDiffTime 0 $ secondsToNominalDiffTime $ negate 86399
-        , testReadShowExact "P-1D" $ CalendarDiffTime 0 $ secondsToNominalDiffTime $ negate 86400
-        , testReadShowExact "P-2DT23H59M59S" $ CalendarDiffTime 0 $ secondsToNominalDiffTime $ negate 86401
-        , testReadShowExact "P1M-1DT1S" $ CalendarDiffTime 1 $ secondsToNominalDiffTime $ negate 86399
-        , testReadShowExact "P1M-1D" $ CalendarDiffTime 1 $ secondsToNominalDiffTime $ negate 86400
-        , testReadShowExact "P1M-2DT23H59M59S" $ CalendarDiffTime 1 $ secondsToNominalDiffTime $ negate 86401
-        , testReadShowExact "P-1Y-1M-1DT1S" $ CalendarDiffTime (-13) $ secondsToNominalDiffTime $ negate 86399
-        , testReadShowExact "P-1Y-1M-1D" $ CalendarDiffTime (-13) $ secondsToNominalDiffTime $ negate 86400
-        , testReadShowExact "P-1Y-1M-2DT23H59M59S" $ CalendarDiffTime (-13) $ secondsToNominalDiffTime $ negate 86401
-        ]
--}
+testCalendarDiffTime = testGroup "CalendarDiffTime" [] -- No Read

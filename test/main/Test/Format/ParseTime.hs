@@ -104,21 +104,7 @@ instance (HasFormatCodes t) => Arbitrary (FormatCode ParseAndFormat t) where
 testParseTime :: TestTree
 testParseTime =
   testGroup
-    "testParseTime"
-    []
-
-{-
-        [ readsTests
-        , simpleFormatTests
-        , extests
-        , spacingTests
-        , particularParseTests
-        , badParseTests
-        , defaultTimeZoneTests
-        , militaryTimeZoneTests
-        , propertyTests
-        ]
--}
+    "testParseTime" []
 
 yearDays :: Integer -> [Day]
 yearDays y = [(fromGregorian y 1 1) .. (fromGregorian y 12 31)]
@@ -467,6 +453,18 @@ instance HasFormatCodes Day where
 instance HasFormatCodes TimeOfDay where
   allFormatCodes _ = [(False, s) | s <- "RTXrPpHkIlMSqQ"]
 
+instance HasFormatCodes DayOfWeek where
+  allFormatCodes _ = [(False, s) | s <- "uwaA"]
+
+instance HasFormatCodes Month where
+  allFormatCodes _ = [(False, s) | s <- "YyCBbhm"]
+
+instance HasFormatCodes QuarterOfYear where
+  allFormatCodes _ = [(False, s) | s <- "v"]
+
+instance HasFormatCodes Quarter where
+  allFormatCodes _ = allFormatCodes (Proxy :: Proxy QuarterOfYear) ++ [(False, s) | s <- "YyC"]
+
 instance HasFormatCodes LocalTime where
   allFormatCodes _ = allFormatCodes (Proxy :: Proxy Day) ++ allFormatCodes (Proxy :: Proxy TimeOfDay)
 
@@ -528,7 +526,8 @@ instance Show (FormatString a) where
 typedTests :: (forall t. (Eq t, FormatTime t, ParseTime t, Show t) => FormatString t -> t -> Result) -> [TestTree]
 typedTests prop =
   [ nameTest "Day" $ tgroup dayFormats prop,
-    -- , nameTest "Month" $ tgroup monthFormats prop
+    -- TODO: nameTest "Month" $ tgroup monthFormats prop,
+    -- TODO: nameTest "Quarter" $ tgroup quarterFormats prop,
     nameTest "TimeOfDay" $ tgroup timeOfDayFormats prop,
     nameTest "LocalTime" $ tgroup localTimeFormats prop,
     nameTest "TimeZone" $ tgroup timeZoneFormats prop,
@@ -538,10 +537,10 @@ typedTests prop =
         \fmt t -> (todSec $ localTimeOfDay $ zonedTimeToLocalTime t) < 60 ==> prop fmt t,
     nameTest "UTCTime" $ tgroup utcTimeAlmostFormats $ \fmt t -> utctDayTime t < 86400 ==> prop fmt t,
     nameTest "UniversalTime" $ tgroup universalTimeFormats prop
-    -- , nameTest "CalendarDiffDays" $ tgroup calendarDiffDaysFormats prop
-    -- , nameTest "CalenderDiffTime" $ tgroup calendarDiffTimeFormats prop
-    -- , nameTest "DiffTime" $ tgroup diffTimeFormats prop
-    -- , nameTest "NominalDiffTime" $ tgroup nominalDiffTimeFormats prop
+    -- TODO: nameTest "CalendarDiffDays" $ tgroup calendarDiffDaysFormats prop,
+    -- TODO: nameTest "CalendarDiffTime" $ tgroup calendarDiffTimeFormats prop,
+    -- TODO: nameTest "DiffTime" $ tgroup diffTimeFormats prop,
+    -- TODO: nameTest "NominalDiffTime" $ tgroup nominalDiffTimeFormats prop
   ]
 
 allTypes ::
@@ -550,6 +549,10 @@ allTypes ::
 allTypes f =
   [ f "Day" (Proxy :: Proxy Day),
     f "TimeOfDay" (Proxy :: Proxy TimeOfDay),
+    -- TODO: f "DayOfWeek" (Proxy :: Proxy DayOfWeek),
+    -- TODO: f "Month" (Proxy :: Proxy Month),
+    -- TODO: f "QuarterOfYear" (Proxy :: Proxy QuarterOfYear),
+    -- TODO: f "Quarter" (Proxy :: Proxy Quarter),
     f "LocalTime" (Proxy :: Proxy LocalTime),
     f "TimeZone" (Proxy :: Proxy TimeZone),
     f "ZonedTime" (Proxy :: Proxy ZonedTime),
@@ -589,6 +592,81 @@ parseEmptyTest _ =
 
 parseEmptyTests :: TestTree
 parseEmptyTests = nameTest "parse empty" $ allTypes $ \name p -> nameTest name $ parseEmptyTest p
+
+class (Eq a, Show a, ParseTime a) => TestParse a where
+  nonPosixValue :: a -> Bool
+  nonPosixValue _ = False
+
+instance TestParse UTCTime where
+  nonPosixValue (UTCTime _ dt) = dt >= 86400 || dt < 0
+
+instance TestParse ZonedTime where
+  nonPosixValue (ZonedTime t _) = nonPosixValue t
+
+instance TestParse TimeZone
+
+instance TestParse LocalTime where
+  nonPosixValue (LocalTime _ t) = nonPosixValue t
+
+instance TestParse Day
+
+-- TODO: instance TestParse Month
+
+-- TODO: instance TestParse DayOfWeek
+
+instance TestParse TimeOfDay where
+  nonPosixValue (TimeOfDay _ _ s) = s >= 60 || s < 0
+
+prop_parse_s :: forall a. (TestParse a) => (UTCTime -> a) -> UTCTime -> Result
+prop_parse_s f t =
+  if nonPosixValue t
+    then succeeded
+    else
+      let str = format "%s%Q" t
+          found = parse False "%s%Q" str
+          expected = f t
+       in compareResult (Just expected) found
+
+prop_parse_sz :: forall a. (TestParse a) => (ZonedTime -> a) -> ZonedTime -> Result
+prop_parse_sz f t =
+  if nonPosixValue t
+    then succeeded
+    else
+      let str = format "%s%Q %z" t
+          found = parse False "%s%Q %z" str
+          expected = f t
+       in compareResult (Just expected) found
+
+zeroTimeZone :: TimeZone
+zeroTimeZone = TimeZone 0 False ""
+
+parse_s_tests :: TestTree
+parse_s_tests =
+  nameTest
+    "parse_s"
+    [ nameTest "UTCTime" $ prop_parse_s @UTCTime id,
+      nameTest "ZonedTime" $ prop_parse_s @ZonedTime $ utcToZonedTime zeroTimeZone,
+      nameTest "TimeZone" $ prop_parse_s @TimeZone $ \_ -> zeroTimeZone,
+      nameTest "LocalTime" $ prop_parse_s @LocalTime $ utcToLocalTime zeroTimeZone,
+      nameTest "Day" $ prop_parse_s @Day utctDay,
+      -- TODO: nameTest "Month" $ prop_parse_s @Month $ (\(MonthDay m _) -> m) . utctDay,
+      -- TODO: nameTest "DayOfWeek" $ prop_parse_s @DayOfWeek $ dayOfWeek . utctDay,
+      nameTest "TimeOfDay" $ prop_parse_s @TimeOfDay $ localTimeOfDay . utcToLocalTime zeroTimeZone
+    ]
+
+parse_sz_tests :: TestTree
+parse_sz_tests =
+  nameTest
+    "parse_sz"
+    [ nameTest "UTCTime" $ prop_parse_sz @UTCTime zonedTimeToUTC,
+      nameTest "ZonedTime" $ prop_parse_sz @ZonedTime id,
+      nameTest "TimeZone" $ prop_parse_sz @TimeZone zonedTimeZone,
+      nameTest "LocalTime" $ prop_parse_sz @LocalTime zonedTimeToLocalTime,
+      nameTest "Day" $ prop_parse_sz @Day $ localDay . zonedTimeToLocalTime,
+      -- TODO: nameTest "Month" $ prop_parse_sz @Month $ (\(MonthDay m _) -> m) . localDay . zonedTimeToLocalTime,
+      -- TODO: nameTest "DayOfWeek" $ prop_parse_sz @DayOfWeek $ dayOfWeek . localDay . zonedTimeToLocalTime,
+      nameTest "TimeOfDay" $ prop_parse_sz @TimeOfDay $ localTimeOfDay . zonedTimeToLocalTime
+    ]
 
 formatParseFormatTests :: TestTree
 formatParseFormatTests =
@@ -639,8 +717,8 @@ readShowTests =
       nameTest "UniversalTime" (prop_read_show :: UniversalTime -> Result),
       nameTest "NominalDiffTime" (prop_read_show :: NominalDiffTime -> Result),
       nameTest "DiffTime" (prop_read_show :: DiffTime -> Result)
-      -- , nameTest "CalendarDiffDays" (prop_read_show :: CalendarDiffDays -> Result)
-      -- , nameTest "CalendarDiffTime" (prop_read_show :: CalendarDiffTime -> Result)
+      -- TODO: nameTest "CalendarDiffDays" (prop_read_show :: CalendarDiffDays -> Result),
+      -- TODO: nameTest "CalendarDiffTime" (prop_read_show :: CalendarDiffTime -> Result)
     ]
 
 parseShowTests :: TestTree
@@ -665,6 +743,8 @@ propertyTests =
         nameTest "parse_format_lower" $ typedTests prop_parse_format_lower,
         nameTest "parse_format_upper" $ typedTests prop_parse_format_upper,
         parseEmptyTests,
+        parse_s_tests,
+        parse_sz_tests,
         formatParseFormatTests,
         badInputTests
       ]
@@ -737,6 +817,22 @@ monthFormats =
       "%C-%y-%B",
       "%C-%y-%b",
       "%C-%y-%h"
+    ]
+
+quarterFormats :: [FormatString Quarter]
+quarterFormats =
+  map
+    FormatString
+    -- numeric year, quarter
+    [ "%Y-%v",
+      "%Y-Q%v",
+      "%YQ%v",
+      "%C%y%v",
+      "%Y %v",
+      "%v/%Y",
+      "%v/%Y",
+      "%Y/%vm",
+      "%C %y %v"
     ]
 
 timeOfDayFormats :: [FormatString TimeOfDay]

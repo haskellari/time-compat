@@ -1,19 +1,9 @@
 -- Tests succeed if module compiles
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Test.Format.Compile
   (
   )
 where
 
-{-
-import Data.Time.Compat
-
-newtype WrappedUTCTime
-    = MkWrappedUTCTime UTCTime
-    deriving (FormatTime, ParseTime)
-
-newtype Wrapped t
-    = MkWrapped t
-    deriving (FormatTime, ParseTime)
--}
+-- broken on older GHCs or time
+--    • Couldn't match representation of type: proxy t
+--                               with that of: proxy (Wrapped t)

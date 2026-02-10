@@ -1,6 +1,6 @@
 module Main where
 
-import Data.Time
+import Data.Time.Compat
 
 showTZ :: TimeZone -> String
 showTZ tz =

@@ -1,3 +1,12 @@
+# 1.9.9
+
+- Support `time-1.15`
+  - add patterns for DiffTime & NominalDiffTime
+  - add more Lift instances
+  - fix MonthDay and QuarterDay clipping
+
+# 1.9.8
+
 # 1.9.7
 
 - Drop support for GHCs prior 8.6.5
