@@ -132,9 +132,8 @@ test-suite main
   build-depends:
       base
     , deepseq
-    , QuickCheck        >=2.15.0.1 && <2.16
-    , random            >=1.2.1.3  && <1.3
-    , tagged            >=0.8.9    && <0.9
+    , QuickCheck        >=2.15.0.1 && <2.17
+    , random            >=1.2.1.3  && <1.4
     , tasty             >=1.5      && <1.6
     , tasty-hunit       >=0.10     && <0.11
     , tasty-quickcheck  >=0.11     && <0.12
@@ -146,7 +145,6 @@ test-suite main
         fail        >=4.9.0.0 && <4.10
       , semigroups  >=0.18.5  && <0.21
 
-  build-depends:      time
   main-is:            Main.hs
   other-modules:
     Test.Arbitrary
