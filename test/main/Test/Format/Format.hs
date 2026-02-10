@@ -1,6 +1,7 @@
-module Test.Format.Format (
-    testFormat,
-) where
+module Test.Format.Format
+  ( testFormat,
+  )
+where
 
 import Data.Proxy
 import Data.Time.Compat
@@ -25,33 +26,32 @@ widths = ["", "1", "2", "9", "12"]
 
 formats :: [String]
 formats =
-    ["%G-W%V-%u", "%U-%w", "%W-%u"]
-        ++ (fmap (\char -> '%' : [char]) chars)
-        ++ ( concat $
-                fmap
-                    (\char -> concat $ fmap (\width -> fmap (\modifier -> "%" ++ [modifier] ++ width ++ [char]) modifiers) widths)
-                    chars
-           )
+  ["%G-W%V-%u", "%U-%w", "%W-%u"]
+    ++ (fmap (\char -> '%' : [char]) chars)
+    ++ ( concat $
+           fmap
+             (\char -> concat $ fmap (\width -> fmap (\modifier -> "%" ++ [modifier] ++ width ++ [char]) modifiers) widths)
+             chars
+       )
 
 somestrings :: [String]
 somestrings = ["", " ", "-", "\n"]
 
 compareExpected :: (Eq t, Show t, ParseTime t) => String -> String -> String -> Proxy t -> TestTree
 compareExpected testname fmt str proxy =
-    testCase testname $ do
-        let
-            found :: ParseTime t => Proxy t -> Maybe t
-            found _ = parseTimeM False defaultTimeLocale fmt str
-        assertEqual "" Nothing $ found proxy
+  testCase testname $ do
+    let found :: (ParseTime t) => Proxy t -> Maybe t
+        found _ = parseTimeM False defaultTimeLocale fmt str
+    assertEqual "" Nothing $ found proxy
 
 checkParse :: String -> String -> [TestTree]
 checkParse fmt str =
-    [ compareExpected "Day" fmt str (Proxy :: Proxy Day)
-    , compareExpected "TimeOfDay" fmt str (Proxy :: Proxy TimeOfDay)
-    , compareExpected "LocalTime" fmt str (Proxy :: Proxy LocalTime)
-    , compareExpected "TimeZone" fmt str (Proxy :: Proxy TimeZone)
-    , compareExpected "UTCTime" fmt str (Proxy :: Proxy UTCTime)
-    ]
+  [ compareExpected "Day" fmt str (Proxy :: Proxy Day),
+    compareExpected "TimeOfDay" fmt str (Proxy :: Proxy TimeOfDay),
+    compareExpected "LocalTime" fmt str (Proxy :: Proxy LocalTime),
+    compareExpected "TimeZone" fmt str (Proxy :: Proxy TimeZone),
+    compareExpected "UTCTime" fmt str (Proxy :: Proxy UTCTime)
+  ]
 
 testCheckParse :: TestTree
 testCheckParse = testGroup "checkParse" $ tgroup formats $ \fmt -> tgroup somestrings $ \str -> checkParse fmt str
@@ -61,61 +61,60 @@ days = [(fromGregorian 2018 1 5) .. (fromGregorian 2018 1 26)]
 
 testDayOfWeek :: TestTree
 testDayOfWeek =
-    testGroup "DayOfWeek" $
-        tgroup "uwaA" $ \fmt ->
-            tgroup days $ \day ->
-                let
-                    dayFormat = formatTime defaultTimeLocale ['%', fmt] day
-                    dowFormat = formatTime defaultTimeLocale ['%', fmt] $ dayOfWeek day
-                in
-                    assertEqual "" dayFormat dowFormat
+  testGroup "DayOfWeek" $
+    tgroup "uwaA" $ \fmt ->
+      tgroup days $ \day ->
+        let dayFormat = formatTime defaultTimeLocale ['%', fmt] day
+            dowFormat = formatTime defaultTimeLocale ['%', fmt] $ dayOfWeek day
+         in assertEqual "" dayFormat dowFormat
 
 testZone :: String -> String -> Int -> TestTree
 testZone fmt expected minutes =
-    testCase (show fmt) $ assertEqual "" expected $ formatTime defaultTimeLocale fmt $ TimeZone minutes False ""
+  testCase (show fmt) $ assertEqual "" expected $ formatTime defaultTimeLocale fmt $ TimeZone minutes False ""
 
 testZonePair :: String -> String -> Int -> TestTree
 testZonePair mods expected minutes =
-    testGroup
-        (show mods ++ " " ++ show minutes)
-        [testZone ("%" ++ mods ++ "z") expected minutes, testZone ("%" ++ mods ++ "Z") expected minutes]
+  testGroup
+    (show mods ++ " " ++ show minutes)
+    [testZone ("%" ++ mods ++ "z") expected minutes, testZone ("%" ++ mods ++ "Z") expected minutes]
 
 testTimeZone :: TestTree
 testTimeZone =
-    testGroup
-        "TimeZone"
-        [ testZonePair "" "+0000" 0
-        , testZonePair "E" "+00:00" 0
-        , testZonePair "" "+0500" 300
-        , testZonePair "E" "+05:00" 300
-        , testZonePair "3" "+0500" 300
-        , testZonePair "4E" "+05:00" 300
-        , testZonePair "4" "+0500" 300
-        , testZonePair "5E" "+05:00" 300
-        , testZonePair "5" "+00500" 300
-        , testZonePair "6E" "+005:00" 300
-        , testZonePair "" "-0700" (-420)
-        , testZonePair "E" "-07:00" (-420)
-        , testZonePair "" "+1015" 615
-        , testZonePair "E" "+10:15" 615
-        , testZonePair "3" "+1015" 615
-        , testZonePair "4E" "+10:15" 615
-        , testZonePair "4" "+1015" 615
-        , testZonePair "5E" "+10:15" 615
-        , testZonePair "5" "+01015" 615
-        , testZonePair "6E" "+010:15" 615
-        , testZonePair "" "-1130" (-690)
-        , testZonePair "E" "-11:30" (-690)
-        ]
+  testGroup
+    "TimeZone"
+    [ testZonePair "" "+0000" 0,
+      testZonePair "E" "+00:00" 0,
+      testZonePair "" "+0500" 300,
+      testZonePair "E" "+05:00" 300,
+      testZonePair "3" "+0500" 300,
+      testZonePair "4E" "+05:00" 300,
+      testZonePair "4" "+0500" 300,
+      testZonePair "5E" "+05:00" 300,
+      testZonePair "5" "+00500" 300,
+      testZonePair "6E" "+005:00" 300,
+      testZonePair "" "-0700" (-420),
+      testZonePair "E" "-07:00" (-420),
+      testZonePair "" "+1015" 615,
+      testZonePair "E" "+10:15" 615,
+      testZonePair "3" "+1015" 615,
+      testZonePair "4E" "+10:15" 615,
+      testZonePair "4" "+1015" 615,
+      testZonePair "5E" "+10:15" 615,
+      testZonePair "5" "+01015" 615,
+      testZonePair "6E" "+010:15" 615,
+      testZonePair "" "-1130" (-690),
+      testZonePair "E" "-11:30" (-690)
+    ]
 
-testAFormat :: FormatTime t => String -> String -> t -> TestTree
+testAFormat :: (FormatTime t) => String -> String -> t -> TestTree
 testAFormat fmt expected t = testCase fmt $ assertEqual "" expected $ formatTime defaultTimeLocale fmt t
 
 testNominalDiffTime :: TestTree
 testNominalDiffTime =
-    testGroup
-        "NominalDiffTime"
-        []
+  testGroup
+    "NominalDiffTime"
+    []
+
 {-
         [ testAFormat "%ww%Dd%Hh%Mm%ESs" "3w2d2h22m8.21s" $ (fromRational $ 23 * 86400 + 8528.21 :: NominalDiffTime)
         , testAFormat "%dd %hh %mm %ss %Ess" "0d 0h 0m 0s 0.74s" $ (fromRational $ 0.74 :: NominalDiffTime)
@@ -143,9 +142,10 @@ testNominalDiffTime =
 
 testDiffTime :: TestTree
 testDiffTime =
-    testGroup
-        "DiffTime"
-        []
+  testGroup
+    "DiffTime"
+    []
+
 {-
         [ testAFormat "%ww%Dd%Hh%Mm%ESs" "3w2d2h22m8.21s" $ (fromRational $ 23 * 86400 + 8528.21 :: DiffTime)
         , testAFormat "%dd %hh %mm %ss %Ess" "0d 0h 0m 0s 0.74s" $ (fromRational $ 0.74 :: DiffTime)
@@ -171,9 +171,10 @@ testDiffTime =
 
 testCalenderDiffDays :: TestTree
 testCalenderDiffDays =
-    testGroup
-        "CalenderDiffDays"
-        []
+  testGroup
+    "CalenderDiffDays"
+    []
+
 {-
         [ testAFormat "%yy%Bm%ww%Dd" "5y4m3w2d" $ CalendarDiffDays 64 23
         , testAFormat "%bm %dd" "64m 23d" $ CalendarDiffDays 64 23
@@ -184,9 +185,10 @@ testCalenderDiffDays =
 
 testCalenderDiffTime :: TestTree
 testCalenderDiffTime =
-    testGroup
-        "CalenderDiffTime"
-        []
+  testGroup
+    "CalenderDiffTime"
+    []
+
 {-
         [ testAFormat "%yy%Bm%ww%Dd%Hh%Mm%Ss" "5y4m3w2d2h22m8s" $ CalendarDiffTime 64 $ 23 * 86400 + 8528.21
         , testAFormat "%yy%Bm%ww%Dd%Hh%Mm%ESs" "5y4m3w2d2h22m8.21s" $ CalendarDiffTime 64 $ 23 * 86400 + 8528.21
@@ -213,12 +215,12 @@ testCalenderDiffTime =
 
 testFormat :: TestTree
 testFormat =
-    testGroup "testFormat" $
-        [ testCheckParse
-        , testDayOfWeek
-        , testTimeZone
-        , testNominalDiffTime
-        , testDiffTime
-        , testCalenderDiffDays
-        , testCalenderDiffTime
-        ]
+  testGroup "testFormat" $
+    [ testCheckParse,
+      testDayOfWeek,
+      testTimeZone,
+      testNominalDiffTime,
+      testDiffTime,
+      testCalenderDiffDays,
+      testCalenderDiffTime
+    ]

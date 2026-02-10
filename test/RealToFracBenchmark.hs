@@ -11,13 +11,13 @@ import Prelude
 
 main :: IO ()
 main = do
-    ts <-
-        replicateM 100000 $ do
-            t <-
-                posixSecondsToUTCTime . realToFrac
-                    <$> ((*) . fromInteger <$> randomRIO (-15 * 10 ^ 21, 15 * 10 ^ 21) <*> randomIO :: IO Double) ::
-                    IO UTCTime
-            rnf t `seq` return t
-    now <- getCurrentTime
-    print . sum $ map (diffUTCTime now) ts
-    print =<< flip diffUTCTime now <$> getCurrentTime
+  ts <-
+    replicateM 100000 $ do
+      t <-
+        posixSecondsToUTCTime . realToFrac
+          <$> ((*) . fromInteger <$> randomRIO (-15 * 10 ^ 21, 15 * 10 ^ 21) <*> randomIO :: IO Double) ::
+          IO UTCTime
+      rnf t `seq` return t
+  now <- getCurrentTime
+  print . sum $ map (diffUTCTime now) ts
+  print =<< flip diffUTCTime now <$> getCurrentTime
