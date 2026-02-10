@@ -30,29 +30,29 @@ import Test.Types ()
 
 tests :: TestTree
 tests =
-    testGroup
-        "Time"
-        [ testGroup
-            "Calendar"
-            [ addDaysTest
-            , testCalendarProps
-            , testCalendars
-            , clipDates
-            , convertBack
-            , longWeekYears
-            , testDayPeriod
-            , testMonthDay
-            , testMonthOfYear
-            , testEaster
-            , testValid
-            , testWeek
-            , testYear
-            , testDuration
-            ]
-        , testGroup "Clock" [testClockConversion, testResolutions, testTAI, testLift]
-        -- , testGroup "Format" [testFormat, testParseTime, testISO8601]
-        , testGroup "LocalTime" [{- testTime, -} testTimeOfDay, testCalendarDiffTime]
-        ]
+  testGroup
+    "Time"
+    [ testGroup
+        "Calendar"
+        [ addDaysTest,
+          testCalendarProps,
+          testCalendars,
+          clipDates,
+          convertBack,
+          longWeekYears,
+          testDayPeriod,
+          testMonthDay,
+          testMonthOfYear,
+          testEaster,
+          testValid,
+          testWeek,
+          testYear,
+          testDuration
+        ],
+      testGroup "Clock" [testClockConversion, testResolutions, testTAI, testLift],
+      -- , testGroup "Format" [testFormat, testParseTime, testISO8601]
+      testGroup "LocalTime" [{- testTime, -} testTimeOfDay, testCalendarDiffTime]
+    ]
 
 main :: IO ()
 main = defaultMain tests

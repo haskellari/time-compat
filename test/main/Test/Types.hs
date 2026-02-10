@@ -3,11 +3,11 @@ module Test.Types () where
 import Control.DeepSeq
 import Data.Data
 import Data.Ix
-import Data.Time.Compat
 import Data.Time.Calendar.Month.Compat
 import Data.Time.Calendar.Quarter.Compat
 import Data.Time.Clock.System.Compat
 import Data.Time.Clock.TAI.Compat
+import Data.Time.Compat
 
 class (Typeable t, Data t, NFData t) => CheckDataInstances t
 

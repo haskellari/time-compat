@@ -1,8 +1,9 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Test.Format.ISO8601 (
-    testISO8601,
-) where
+module Test.Format.ISO8601
+  ( testISO8601,
+  )
+where
 
 import Data.Coerce
 import Data.Ratio
@@ -21,27 +22,25 @@ deriving instance Eq ZonedTime
 readShowProperty :: (Eq a, Show a) => (a -> Bool) -> Format a -> a -> Property
 readShowProperty skip _ val | skip val = property Discard
 readShowProperty _ fmt val =
-    case formatShowM fmt val of
-        Nothing -> property Discard
-        Just str ->
-            let
-                found = formatParseM fmt str
-                expected = Just val
-            in
-                property $
-                    if expected == found
-                        then succeeded
-                        else failed{reason = show str ++ ": expected " ++ (show expected) ++ ", found " ++ (show found)}
+  case formatShowM fmt val of
+    Nothing -> property Discard
+    Just str ->
+      let found = formatParseM fmt str
+          expected = Just val
+       in property $
+            if expected == found
+              then succeeded
+              else failed {reason = show str ++ ": expected " ++ (show expected) ++ ", found " ++ (show found)}
 
 class SpecialTestValues a where
-    -- | values that should always be tested
-    specialTestValues :: [a]
+  -- | values that should always be tested
+  specialTestValues :: [a]
 
 instance {-# OVERLAPPABLE #-} SpecialTestValues a where
-    specialTestValues = []
+  specialTestValues = []
 
 instance SpecialTestValues TimeOfDay where
-    specialTestValues = [TimeOfDay 0 0 0, TimeOfDay 0 0 60, TimeOfDay 1 0 60, TimeOfDay 24 0 0]
+  specialTestValues = [TimeOfDay 0 0 0, TimeOfDay 0 0 60, TimeOfDay 1 0 60, TimeOfDay 24 0 0]
 
 readShowTestCheck :: (Eq a, Show a, Arbitrary a, SpecialTestValues a) => (a -> Bool) -> Format a -> [TestTree]
 readShowTestCheck skip fmt = [nameTest "random" $ readShowProperty skip fmt, nameTest "special" $ fmap (\a -> nameTest (show a) $ readShowProperty skip fmt a) $ filter (not . skip) specialTestValues]
@@ -49,7 +48,7 @@ readShowTestCheck skip fmt = [nameTest "random" $ readShowProperty skip fmt, nam
 readShowTest :: (Eq a, Show a, Arbitrary a, SpecialTestValues a) => Format a -> [TestTree]
 readShowTest = readShowTestCheck $ \_ -> False
 
-readBoth :: NameTest t => (FormatExtension -> t) -> [TestTree]
+readBoth :: (NameTest t) => (FormatExtension -> t) -> [TestTree]
 readBoth fmts = [nameTest "extended" $ fmts ExtendedFormat, nameTest "basic" $ fmts BasicFormat]
 
 readShowTestsCheck :: (Eq a, Show a, Arbitrary a, SpecialTestValues a) => (a -> Bool) -> (FormatExtension -> Format a) -> [TestTree]
@@ -59,34 +58,33 @@ readShowTests :: (Eq a, Show a, Arbitrary a, SpecialTestValues a) => (FormatExte
 readShowTests = readShowTestsCheck $ \_ -> False
 
 newtype Durational t = MkDurational {unDurational :: t}
-    deriving (Eq)
+  deriving (Eq)
 
-instance Show t => Show (Durational t) where
-    show (MkDurational t) = show t
+instance (Show t) => Show (Durational t) where
+  show (MkDurational t) = show t
 
 instance Arbitrary (Durational CalendarDiffDays) where
-    arbitrary = do
-        mm <- choose (-10000, 10000)
-        dd <- choose (-40, 40)
-        return $ MkDurational $ CalendarDiffDays mm dd
+  arbitrary = do
+    mm <- choose (-10000, 10000)
+    dd <- choose (-40, 40)
+    return $ MkDurational $ CalendarDiffDays mm dd
 
 instance Arbitrary (Durational CalendarDiffTime) where
-    arbitrary =
-        let
-            limit = 40 * 86400
-            picofactor = 10 ^ (12 :: Int)
-        in
-            do
-                mm <- choose (-10000, 10000)
-                ss <- choose (negate limit * picofactor, limit * picofactor)
-                return $ MkDurational $ CalendarDiffTime mm $ fromRational $ ss % picofactor
+  arbitrary =
+    let limit = 40 * 86400
+        picofactor = 10 ^ (12 :: Int)
+     in do
+          mm <- choose (-10000, 10000)
+          ss <- choose (negate limit * picofactor, limit * picofactor)
+          return $ MkDurational $ CalendarDiffTime mm $ fromRational $ ss % picofactor
 
 durationalFormat :: Format a -> Format (Durational a)
 durationalFormat = coerce
 
 testReadShowFormat :: TestTree
 testReadShowFormat =
-    testGroup "read-show format" []
+  testGroup "read-show format" []
+
 {-
     nameTest
         "read-show format"
@@ -142,18 +140,19 @@ testReadShowFormat =
 
 testShowReadFormat :: (Show t, Eq t) => String -> Format t -> String -> t -> TestTree
 testShowReadFormat name fmt str val =
-    nameTest
-        (name ++ ": " ++ str)
-        [ nameTest "show" $ assertEqual "" (Just str) $ formatShowM fmt val
-        , nameTest "read" $ assertEqual "" (Just val) $ formatParseM fmt str
-        ]
+  nameTest
+    (name ++ ": " ++ str)
+    [ nameTest "show" $ assertEqual "" (Just str) $ formatShowM fmt val,
+      nameTest "read" $ assertEqual "" (Just val) $ formatParseM fmt str
+    ]
 
 testReadFormat :: (Show t, Eq t) => String -> Format t -> String -> t -> TestTree
 testReadFormat name fmt str val = nameTest (name ++ ": " ++ str) $ assertEqual "" (Just val) $ formatParseM fmt str
 
 testShowFormats :: TestTree
 testShowFormats =
-    testGroup "show format" []
+  testGroup "show format" []
+
 {-
     nameTest
         "show format"
