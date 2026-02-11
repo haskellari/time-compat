@@ -21,20 +21,23 @@ testbuild() {
     echo "== ghc-$1 time-$2"
     echo "===================================================================="
 
-	echo "$OPERATION" --builddir="dist-newstyle/ghc-$1-time-$2" --with-compiler="ghc-$1" --constraint="time == $2"
-	$OPERATION --builddir="dist-newstyle/ghc-$1-time-$2" --with-compiler="ghc-$1" --constraint="time == $2"
+	echo "$OPERATION" --builddir="dist-newstyle/ghc-$1-time-$2" --with-compiler="ghc-$1" --constraint="time==$2"
+	$OPERATION --builddir="dist-newstyle/ghc-$1-time-$2" --with-compiler="ghc-$1" --constraint="time==$2"
 }
 
-testbuild 9.12.1 1.14
-testbuild 9.8.2  1.14
-testbuild 9.6.6  1.14
+testbuild 9.12.2 1.15
+testbuild 9.8.4  1.15
+
+testbuild 9.12.2 1.14
+testbuild 9.8.4  1.14
+testbuild 9.6.7  1.14
 testbuild 9.4.8  1.14
 testbuild 9.2.8  1.14
 testbuild 9.0.2  1.14
 
-testbuild 9.10.1 1.12.2
-testbuild 9.8.2  1.12.2
-testbuild 9.6.6  1.12.2
+testbuild 9.10.2 1.12.2
+testbuild 9.8.4  1.12.2
+testbuild 9.6.7  1.12.2
 testbuild 9.4.8  1.12.2
 testbuild 9.2.8  1.12.2
 testbuild 9.0.2  1.12.2

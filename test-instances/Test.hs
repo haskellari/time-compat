@@ -60,6 +60,7 @@ _instances =
     , inst (P @TimeZone) (P @FormatTime)
     , inst (P @TimeZone) (P @ISO8601)
     , inst (P @TimeZone) (P @ParseTime)
+    , inst (P @TimeZone) (P @TH.Lift)
 
     , inst (P @TimeOfDay) (P @Data)
     , inst (P @TimeOfDay) (P @Generic)
@@ -71,6 +72,7 @@ _instances =
     , inst (P @TimeOfDay) (P @FormatTime)
     , inst (P @TimeOfDay) (P @ISO8601)
     , inst (P @TimeOfDay) (P @ParseTime)
+    , inst (P @TimeOfDay) (P @TH.Lift)
 
     , inst (P @CalendarDiffTime) (P @Data)
     , inst (P @CalendarDiffTime) (P @Mon.Monoid)
@@ -83,6 +85,7 @@ _instances =
     -- , inst (P @CalendarDiffTime) (P @FormatTime)
     , inst (P @CalendarDiffTime) (P @ISO8601)
     -- , inst (P @CalendarDiffTime) (P @ParseTime)
+    , inst (P @CalendarDiffTime) (P @TH.Lift)
 
     , inst (P @LocalTime) (P @Data)
     , inst (P @LocalTime) (P @Generic)
@@ -94,6 +97,7 @@ _instances =
     , inst (P @LocalTime) (P @FormatTime)
     , inst (P @LocalTime) (P @ISO8601)
     , inst (P @LocalTime) (P @ParseTime)
+    , inst (P @LocalTime) (P @TH.Lift)
 
     , inst (P @ZonedTime) (P @Data)
     , inst (P @ZonedTime) (P @Generic)
@@ -103,6 +107,7 @@ _instances =
     , inst (P @ZonedTime) (P @FormatTime)
     , inst (P @ZonedTime) (P @ISO8601)
     , inst (P @ZonedTime) (P @ParseTime)
+    , inst (P @ZonedTime) (P @TH.Lift)
 
     , inst (P @UniversalTime) (P @Data)
     , inst (P @UniversalTime) (P @Generic)
@@ -201,6 +206,7 @@ _instances =
     , inst (P @Quarter) (P @Eq)
     , inst (P @Quarter) (P @Ord)
     , inst (P @Quarter) (P @Generic)
+    , inst (P @Quarter) (P @TH.Lift)
 
     , inst (P @QuarterOfYear) (P @Data)
     , inst (P @QuarterOfYear) (P @Read)

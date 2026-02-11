@@ -3,7 +3,7 @@ module Test.TestUtil where
 import Test.QuickCheck.Property
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
+import Test.Tasty.QuickCheck hiding (reason)
 
 assertFailure' :: String -> IO a
 assertFailure' s = do
@@ -37,3 +37,9 @@ instance (Testable a) => NameTest (Gen a) where
 
 tgroup :: (Show a, NameTest t) => [a] -> (a -> t) -> [TestTree]
 tgroup aa f = fmap (\a -> nameTest (show a) $ f a) aa
+
+assertEqualQC :: (Show a, Eq a) => String -> a -> a -> Result
+assertEqualQC _name expected found
+  | expected == found = succeeded
+assertEqualQC "" expected found = failed {reason = "expected " ++ show expected ++ ", found " ++ show found}
+assertEqualQC name expected found = failed {reason = name ++ ": expected " ++ show expected ++ ", found " ++ show found}

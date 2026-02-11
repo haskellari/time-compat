@@ -80,6 +80,7 @@ library
 
   other-modules:
     Data.Format
+    Data.Time.Calendar.DayPeriod
     Data.Time.Calendar.Private
     Data.Time.Calendar.Types
     Data.Time.Orphans
@@ -105,7 +106,7 @@ test-suite instances
 -- * Test.Format.Compile doesn't work
 -- * disabled 'TimeOfDay minBound 0 0' (Test.LocalTime.Time)
 --
-test-suite main
+test-suite test-main
   if !impl(ghc >=7.4)
     buildable: False
 
@@ -114,12 +115,14 @@ test-suite main
   hs-source-dirs:     test/main
   default-extensions:
     CPP
+    DefaultSignatures
     DeriveDataTypeable
     DerivingStrategies
     ExistentialQuantification
     FlexibleInstances
     GeneralizedNewtypeDeriving
     MultiParamTypeClasses
+    NumericUnderscores
     Rank2Types
     RecordWildCards
     ScopedTypeVariables
@@ -137,7 +140,6 @@ test-suite main
     , tasty             >=1.5      && <1.6
     , tasty-hunit       >=0.10     && <0.11
     , tasty-quickcheck  >=0.11     && <0.12
-    , template-haskell
     , time-compat
 
   if !impl(ghc >=8.0)
@@ -169,7 +171,7 @@ test-suite main
     Test.Calendar.Week
     Test.Calendar.Year
     Test.Clock.Conversion
-    Test.Clock.Lift
+    Test.Clock.Pattern
     Test.Clock.Resolution
     Test.Clock.TAI
     Test.Format.Compile
@@ -182,3 +184,15 @@ test-suite main
     Test.LocalTime.TimeRef
     Test.TestUtil
     Test.Types
+
+test-suite test-template
+  type:             exitcode-stdio-1.0
+  default-language: Haskell2010
+  hs-source-dirs:   test/template
+  main-is:          Main.hs
+  build-depends:
+      base
+    , tasty
+    , tasty-hunit
+    , template-haskell
+    , time-compat

@@ -12,7 +12,8 @@ module Data.Time.Calendar.Month.Compat (
     toMonthDay,
 ) where
 
-#if MIN_VERSION_time(1,11,0)
+#if MIN_VERSION_time(1,15,0)
+
 import Data.Time.Calendar
 import Data.Time.Calendar.Month
 
@@ -32,6 +33,36 @@ fromMonthDay = MonthDay
 toMonthDay :: Day -> (Month,DayOfMonth)
 toMonthDay (MonthDay m d) = (m, d)
 
+#elif MIN_VERSION_time(1,11,0)
+
+import Data.Time.Calendar (Year,MonthOfYear,Day,DayOfMonth)
+import Data.Time.Calendar.DayPeriod
+import Data.Time.Calendar.Month hiding (MonthDay)
+
+-- | Part of @YearMonth@ pattern
+fromYearMonth :: Year -> MonthOfYear -> Month
+fromYearMonth = YearMonth
+
+-- | Part of @YearMonth@ pattern
+toYearMonth :: Month -> (Year, MonthOfYear)
+toYearMonth (YearMonth y m) = (y, m)
+
+-- | Part of 'MonthDay' pattern
+toMonthDay :: Day -> (Month,DayOfMonth)
+toMonthDay = periodFromDay
+
+-- | Part of 'MonthDay' pattern
+fromMonthDay :: Month -> DayOfMonth -> Day
+fromMonthDay = periodToDayClip
+
+-- | Bidirectional abstract constructor.
+-- Invalid days of month will be clipped to the correct range.
+pattern MonthDay :: Month -> DayOfMonth -> Day
+pattern MonthDay m dm <- (toMonthDay -> (m,dm)) where
+    MonthDay = fromMonthDay
+
+{-# COMPLETE MonthDay #-}
+
 #else
 
 #if MIN_VERSION_time(1,9,0)
@@ -43,8 +74,8 @@ import Data.Time.Format
 import Data.Time.Calendar
 import Data.Time.Calendar.Julian
 import Data.Time.Calendar.Types
--- import Data.Time.Calendar.Days
 import Data.Time.Calendar.Private
+import Data.Time.Calendar.DayPeriod
 import Data.Data
 import Data.Fixed
 import Text.Read
@@ -137,7 +168,7 @@ diffMonths (MkMonth a) (MkMonth b) = a - b
 fromYearMonthValid :: Year -> MonthOfYear -> Maybe Month
 fromYearMonthValid y my = do
     my' <- clipValid 1 12 my
-    return $ fromYearMonth y my'
+    return $ YearMonth y my'
 
 -- | Part of @YearMonth@ pattern
 fromYearMonth :: Year -> MonthOfYear -> Month
@@ -158,24 +189,26 @@ pattern YearMonth y my <- (toYearMonth -> (y, my))
 
 -- | Part of 'MonthDay' pattern
 toMonthDay :: Day -> (Month,DayOfMonth)
-toMonthDay d = case toGregorian d of
-    (y, my, dm) -> (fromYearMonth y my, dm)
+toMonthDay = periodFromDay
 
 -- | Part of 'MonthDay' pattern
 fromMonthDay :: Month -> DayOfMonth -> Day
-fromMonthDay m dm = case toYearMonth m of
-    (y, my) -> fromGregorian y my dm
+fromMonthDay = periodToDayClip
 
 fromMonthDayValid :: Month -> DayOfMonth -> Maybe Day
-fromMonthDayValid m dm = case toYearMonth m of
-    (y, my) -> fromGregorianValid y my dm
+fromMonthDayValid = periodToDayValid
 
 -- | Bidirectional abstract constructor.
 -- Invalid days of month will be clipped to the correct range.
 pattern MonthDay :: Month -> DayOfMonth -> Day
 pattern MonthDay m dm <- (toMonthDay -> (m,dm)) where
-    MonthDay (YearMonth y my) dm = fromGregorian y my dm
+    MonthDay = fromMonthDay
 
 {-# COMPLETE MonthDay #-}
+
+instance DayPeriod Month where
+    periodFirstDay (YearMonth y m) = fromGregorian y m 1
+    periodLastDay (YearMonth y m) = fromGregorian y m 31 -- clips to correct day
+    dayPeriod (toGregorian -> (y, my, _)) = YearMonth y my
 
 #endif

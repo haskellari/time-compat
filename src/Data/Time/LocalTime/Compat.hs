@@ -36,6 +36,7 @@ import Data.Time.LocalTime
 import Data.Time.Clock.Compat
 import Data.Time.Calendar.Compat
 import Data.Time.Format.Compat
+import qualified Language.Haskell.TH.Syntax as TH
 
 import Data.Fixed (Pico (..), showFixed, divMod')
 import Data.Monoid (Monoid (..))
@@ -95,6 +96,7 @@ data CalendarDiffTime = CalendarDiffTime
     Data
     ,Typeable
     , Generic
+    , TH.Lift
     )
 
 -- | Additive

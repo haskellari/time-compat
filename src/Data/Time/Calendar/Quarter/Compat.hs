@@ -40,6 +40,7 @@ import qualified Language.Haskell.TH.Syntax as TH
 import Data.Time.Calendar
 import Data.Time.Calendar.Types
 import Data.Time.Calendar.Private
+import Data.Time.Calendar.DayPeriod
 import Data.Time.Calendar.Month.Compat
 
 -- | Quarters of each year. Each quarter corresponds to three months.
@@ -72,8 +73,8 @@ instance Bounded QuarterOfYear where
     maxBound = Q4
 
 -- | An absolute count of year quarters.
--- Number is equal to @(year * 4) + (quarterOfYear - 1)@.
-newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable, Generic)
+-- Number is equal to @(year * 6) + (quarterOfYear - 1)@.
+newtype Quarter = MkQuarter Integer deriving (Eq, Ord, Data, Typeable, TH.Lift, Generic)
 
 instance NFData Quarter where
     rnf (MkQuarter m) = rnf m
@@ -146,5 +147,20 @@ fromYearQuarter y qy = MkQuarter $ y * 4 + toInteger (pred $ fromEnum qy)
 toYearQuarter :: Quarter -> (Year, QuarterOfYear)
 toYearQuarter (MkQuarter y) = case divMod' y 4 of
     (y, qy) -> (y, toEnum (succ (fromInteger qy)))
+
+instance DayPeriod Quarter where
+    periodFirstDay (YearQuarter y q) =
+        case q of
+            Q1 -> periodFirstDay $ YearMonth y 1
+            Q2 -> periodFirstDay $ YearMonth y 4
+            Q3 -> periodFirstDay $ YearMonth y 7
+            Q4 -> periodFirstDay $ YearMonth y 10
+    periodLastDay (YearQuarter y q) =
+        case q of
+            Q1 -> periodLastDay $ YearMonth y 3
+            Q2 -> periodLastDay $ YearMonth y 6
+            Q3 -> periodLastDay $ YearMonth y 9
+            Q4 -> periodLastDay $ YearMonth y 12
+    dayPeriod (MonthDay m _) = monthQuarter m
 
 #endif

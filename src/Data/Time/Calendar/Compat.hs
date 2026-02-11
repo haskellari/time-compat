@@ -2,7 +2,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE ViewPatterns       #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 module Data.Time.Calendar.Compat (
     -- * Days
     Day(..),addDays,diffDays,
@@ -72,10 +71,6 @@ import Data.Time.Calendar
 import Data.Time.Format
 import Data.Time.Orphans ()
 
-#if !MIN_VERSION_time(1,12,1)
-import Data.Time.Calendar.Types
-#endif
-
 #if !MIN_VERSION_time(1,9,0)
 import Data.Time.Calendar.WeekDate.Compat
 #endif
@@ -84,14 +79,14 @@ import Data.Time.Calendar.WeekDate.Compat
 import Data.Time.Calendar.MonthDay.Compat
 #endif
 
-#if !MIN_VERSION_time(1,12,0)
-import Data.Time.Calendar.Types
-#endif
-
 #if !MIN_VERSION_time(1,12,1)
+import Data.Time.Calendar.Types
 import Data.Time.Calendar.Month.Compat
 import Data.Time.Calendar.Quarter.Compat
 #endif
+
+import Data.Time.Calendar.Types
+import Data.Time.Calendar.DayPeriod
 
 import Control.DeepSeq (NFData (..))
 import Data.Data       (Data, Typeable)
@@ -99,6 +94,7 @@ import GHC.Generics   (Generic)
 import Data.Monoid     (Monoid (..))
 import Data.Semigroup  (Semigroup (..))
 import qualified Language.Haskell.TH.Syntax as TH
+
 
 -------------------------------------------------------------------------------
 -- CalendarDiffTime
@@ -288,92 +284,4 @@ weekFirstDay firstDay day = addDays (negate 7) $ firstDayOfWeekOnAfter firstDay 
 -- @since 1.12.2
 weekLastDay :: DayOfWeek -> Day -> Day
 weekLastDay firstDay day = pred $ firstDayOfWeekOnAfter firstDay $ succ day
-#endif
-
--------------------------------------------------------------------------------
--- Days
--------------------------------------------------------------------------------
-
-#if !MIN_VERSION_time(1,12,1)
-class Ord p => DayPeriod p where
-    -- | Returns the first 'Day' in a period of days.
-    periodFirstDay :: p -> Day
-
-    -- | Returns the last 'Day' in a period of days.
-    periodLastDay :: p -> Day
-
-    -- | Get the period this day is in.
-    dayPeriod :: Day -> p
-
--- | A list of all the days in this period.
---
--- @since 1.12.1
-periodAllDays :: DayPeriod p => p -> [Day]
-periodAllDays p = [periodFirstDay p .. periodLastDay p]
-
--- | The number of days in this period.
---
--- @since 1.12.1
-periodLength :: DayPeriod p => p -> Int
-periodLength p = succ $ fromInteger $ diffDays (periodLastDay p) (periodFirstDay p)
-
--- | Get the period this day is in, with the 1-based day number within the period.
---
--- @periodFromDay (periodFirstDay p) = (p,1)@
---
--- @since 1.12.1
-periodFromDay :: DayPeriod p => Day -> (p, Int)
-periodFromDay d =
-    let
-        p = dayPeriod d
-        dt = succ $ fromInteger $ diffDays d $ periodFirstDay p
-    in
-        (p, dt)
-
--- | Inverse of 'periodFromDay'.
---
--- @since 1.12.1
-periodToDay :: DayPeriod p => p -> Int -> Day
-periodToDay p i = addDays (toInteger $ pred i) $ periodFirstDay p
-
--- | Validating inverse of 'periodFromDay'.
---
--- @since 1.12.1
-periodToDayValid :: DayPeriod p => p -> Int -> Maybe Day
-periodToDayValid p i =
-    let
-        d = periodToDay p i
-    in
-        if fst (periodFromDay d) == p then Just d else Nothing
-
-instance DayPeriod Day where
-    periodFirstDay = id
-    periodLastDay = id
-    dayPeriod = id
-
-instance DayPeriod Year where
-    periodFirstDay y = YearMonthDay y January 1
-    periodLastDay y = YearMonthDay y December 31
-    dayPeriod (YearMonthDay y _ _) = y
-
-instance DayPeriod Month where
-    periodFirstDay (YearMonth y m) = YearMonthDay y m 1
-    periodLastDay (YearMonth y m) = YearMonthDay y m 31 -- clips to correct day
-    dayPeriod (YearMonthDay y my _) = YearMonth y my
-
-instance DayPeriod Quarter where
-    periodFirstDay (YearQuarter y q) =
-        case q of
-            Q1 -> periodFirstDay $ YearMonth y January
-            Q2 -> periodFirstDay $ YearMonth y April
-            Q3 -> periodFirstDay $ YearMonth y July
-            Q4 -> periodFirstDay $ YearMonth y October
-    periodLastDay (YearQuarter y q) =
-        case q of
-            Q1 -> periodLastDay $ YearMonth y March
-            Q2 -> periodLastDay $ YearMonth y June
-            Q3 -> periodLastDay $ YearMonth y September
-            Q4 -> periodLastDay $ YearMonth y December
-    dayPeriod (MonthDay m _) = monthQuarter m
-
 #endif
